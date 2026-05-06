@@ -10,7 +10,13 @@ use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\PublicController;
 
 Route::get('/', function () {
-    return view('home');
+    $latestCompetitions = \App\Models\Competition::with('fields')
+        ->withCount('registrations')
+        ->where('status', 'aktif')
+        ->latest() 
+        ->take(3)
+        ->get();
+   return view('home', ['latestCompetitions' => $latestCompetitions]);
 })->name('home');
 
 Route::get('/news', function () {

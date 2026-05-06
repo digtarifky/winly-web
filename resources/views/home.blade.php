@@ -155,311 +155,112 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <div
-                class="bg-white rounded-[28px] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all duration-300 flex flex-col group">
+            @forelse($latestCompetitions as $lomba)
+                @php
+                    // Menyalin logika perhitungan Harga & Badge dari Competitions
+                    $hasGratis =
+                        $lomba->fields->contains('tipe_pendaftaran', 'gratis') ||
+                        $lomba->fields->contains('tipe_pendaftaran', 'pilihan');
+                    $hasPremium =
+                        $lomba->fields->contains('tipe_pendaftaran', 'berbayar') ||
+                        $lomba->fields->contains('tipe_pendaftaran', 'pilihan');
 
-                <div class="relative h-[450px] w-full bg-[#f8fafc] overflow-hidden rounded-t-[28px]">
-                    <img src="https://i.pinimg.com/736x/05/2b/6e/052b6eee9ed668347dcff784f356f784.jpg"
-                        alt="Poster Lomba"
-                        class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500">
-                    <div
-                        class="absolute top-4 right-6 bg-blue-100/80 rounded-full border border-blue-200 text-blue-500 text-[11px] font-extrabold px-3 py-1.5 uppercase tracking-wider shadow-md">
-                        PREMIUM
-                    </div>
-                    <div
-                        class="absolute top-4 left-48 bg-green-100/80 rounded-full border border-green-200 text-green-500 text-[11px] font-extrabold px-6 py-1.5 uppercase tracking-wider shadow-md">
-                        FREE
-                    </div>
-                </div>
+                    $minPrice = $lomba->fields->min('harga');
+                    $maxPrice = $lomba->fields->max('harga');
 
-                <div class="p-6 flex flex-col flex-grow">
-                    <h3 class="text-xl font-extrabold text-slate-900 leading-snug mb-5 line-clamp-2">
-                        PESTA SAINS NASIONAL (PSN) TAHUN 2026
-                    </h3>
+                    if ($minPrice == 0 && $maxPrice > 0) {
+                        $priceSummary = 'FREE - Rp ' . number_format($maxPrice, 0, ',', '.');
+                    } elseif ($minPrice == 0 && $maxPrice == 0) {
+                        $priceSummary = 'FREE';
+                    } else {
+                        $priceSummary = 'Rp ' . number_format($minPrice, 0, ',', '.');
+                    }
 
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-start gap-3 text-slate-600 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-blue-500"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                                <line x1="16" x2="16" y1="2" y2="6"></line>
-                                <line x1="8" x2="8" y1="2" y2="6"></line>
-                                <line x1="3" x2="21" y1="10" y2="10"></line>
-                            </svg>
-                            <span class="font-medium mt-0.5">Minggu, 12 April 2026</span>
+                    // Menyalin logika Fasilitas
+                    $benefits = is_array($lomba->benefits)
+                        ? $lomba->benefits
+                        : json_decode($lomba->benefits, true) ?? [];
+                @endphp
+
+                <div
+                    class="bg-white rounded-[24px] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col group hover:-translate-y-1 transition-all duration-300 relative z-0">
+
+                    <div class="relative w-full aspect-[1/1] bg-red-100 rounded-t-[24px] overflow-hidden">
+                        <img src="{{ $lomba->poster ? asset('storage/' . $lomba->poster) : 'https://via.placeholder.com/400x500?text=Poster' }}"
+                            alt="Poster Lomba"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+
+                        <div class="absolute top-4 right-4 flex gap-1.5">
+                            @if ($hasGratis)
+                                <span
+                                    class="bg-green-100/90 text-green-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm border border-green-200 shadow-sm">FREE</span>
+                            @endif
+                            @if ($hasPremium)
+                                <span
+                                    class="bg-blue-100/90 text-blue-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm border border-blue-200 shadow-sm">PREMIUM</span>
+                            @endif
                         </div>
-                        <div class="flex items-start gap-3 text-slate-600 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-blue-500"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            <span class="font-medium mt-0.5 leading-relaxed">Pendaftaran: Kamis, 19 Februari 2026 -
-                                Jumat, 10 April 2026</span>
-                        </div>
                     </div>
 
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <span
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-[11px] font-bold rounded-lg border border-blue-100/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                            </svg> E-Sertifikat
-                        </span>
-                        <span
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 text-[11px] font-bold rounded-lg border border-purple-100/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-                                <path d="M18 9H19.5a2.5 2.5 0 0 0 0-5H18"></path>
-                                <path d="M4 22h16"></path>
-                                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-                                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-                                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-                            </svg> E-money
-                        </span>
-                    </div>
+                    <div class="p-6 flex flex-col flex-grow rounded-b-[24px]">
+                        <h3 class="text-lg font-black text-slate-900 leading-tight mb-4 line-clamp-2"
+                            title="{{ $lomba->judul_lomba }}">
+                            {{ $lomba->judul_lomba }}
+                        </h3>
 
-                    <div class="mt-auto pt-5 border-t border-slate-100">
-                        <div class="flex items-center justify-between mb-5">
-                            <span class="text-2xl font-black text-slate-900 tracking-tight">Rp 50.000</span>
-                            <span
-                                class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg> 179 Peserta
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <a href="#"
-                                class="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                                </svg> Panduan
-                            </a>
-                            <a href="#"
-                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-bold rounded-full transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center gap-2">
-                                Daftar <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M5 12h14"></path>
-                                    <path d="m12 5 7 7-7 7"></path>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
+                                <svg class="w-5 h-5 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
                                 </svg>
-                            </a>
+                                <span>{{ \Carbon\Carbon::parse($lomba->tanggal_pelaksanaan)->translatedFormat('l, d F Y') }}</span>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <div
-                class="bg-white rounded-[28px] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all duration-300 flex flex-col group">
-                <div class="relative h-[450px] w-full bg-[#f8fafc] overflow-hidden rounded-t-[28px]">
-                    <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                        alt="Poster Lomba"
-                        class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500">
-                    <div
-                        class="absolute top-4 right-6 bg-blue-100/80 rounded-full border border-blue-200 text-blue-500 text-[11px] font-extrabold px-3 py-1.5 uppercase tracking-wider shadow-md">
-                        PREMIUM
-                    </div>
-                    <div
-                        class="absolute top-4 left-48 bg-green-100/80 rounded-full border border-green-200 text-green-500 text-[11px] font-extrabold px-6 py-1.5 uppercase tracking-wider shadow-md">
-                        FREE
-                    </div>
-                </div>
+                        <div class="flex flex-wrap gap-2 mb-6 mt-auto">
+                            @forelse($benefits as $ben)
+                                <span
+                                    class="px-3 py-1.5 bg-indigo-50/50 text-indigo-600 text-[11px] font-bold rounded-lg border border-indigo-100 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    {{ $ben }}
+                                </span>
+                            @empty
+                                <span class="text-xs text-slate-400 italic">Fasilitas belum tersedia</span>
+                            @endforelse
+                        </div>
 
-                <div class="p-6 flex flex-col flex-grow">
-                    <h3 class="text-xl font-extrabold text-slate-900 leading-snug mb-5 line-clamp-2">
-                        Senior High School Olympiad (SHSO) 2026 Provinsi Maluku Utara
-                    </h3>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-start gap-3 text-slate-600 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-blue-500"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2">
-                                </rect>
-                                <line x1="16" x2="16" y1="2" y2="6"></line>
-                                <line x1="8" x2="8" y1="2" y2="6"></line>
-                                <line x1="3" x2="21" y1="10" y2="10"></line>
-                            </svg>
-                            <span class="font-medium mt-0.5">Sabtu, 18 April 2026</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-slate-600 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-blue-500"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            <span class="font-medium mt-0.5 leading-relaxed">Pendaftaran: Selasa, 20 Januari 2026 -
-                                Senin, 6 April 2026</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <span
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-[11px] font-bold rounded-lg border border-blue-100/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                            </svg> E-Sertifikat
-                        </span>
-                        <span
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 text-[11px] font-bold rounded-lg border border-amber-100/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                            </svg> Pembahasan
-                        </span>
-                    </div>
-                    <div class="mt-auto pt-5 border-t border-slate-100">
-                        <div class="flex items-center justify-between mb-5">
-                            <span class="text-2xl font-black text-slate-900 tracking-tight">FREE</span>
-                            <span
-                                class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg> 10 Peserta
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <a href="#"
-                                class="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                                </svg> Panduan
-                            </a>
-                            <a href="#"
-                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-bold rounded-full transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center gap-2">
-                                Daftar <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M5 12h14"></path>
-                                    <path d="m12 5 7 7-7 7"></path>
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="text-xl font-black text-slate-900">{{ $priceSummary }}</span>
+                            <div
+                                class="bg-indigo-50 text-indigo-600 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-indigo-100">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
-                            </a>
+                                {{ $lomba->registrations_count ?? 0 }} Peserta
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <div
-                class="bg-white rounded-[28px] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all duration-300 flex flex-col group">
-                <div class="relative h-[450px] w-full bg-[#f8fafc] overflow-hidden rounded-t-[28px]">
-                    <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                        alt="Poster Lomba"
-                        class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500">
-                    <div
-                        class="absolute top-4 right-6 bg-blue-100/80 rounded-full border border-blue-200 text-blue-500 text-[11px] font-extrabold px-3 py-1.5 uppercase tracking-wider shadow-md">
-                        PREMIUM
-                    </div>
-                </div>
-
-                <div class="p-6 flex flex-col flex-grow">
-                    <h3 class="text-xl font-extrabold text-slate-900 leading-snug mb-5 line-clamp-2">
-                        MADRASAH SCIENCE COMPETITION (MASCO) TAHUN 2026
-                    </h3>
-                    <div class="space-y-3 mb-6">
-                        <div class="flex items-start gap-3 text-slate-600 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-blue-500"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2">
-                                </rect>
-                                <line x1="16" x2="16" y1="2" y2="6"></line>
-                                <line x1="8" x2="8" y1="2" y2="6"></line>
-                                <line x1="3" x2="21" y1="10" y2="10"></line>
-                            </svg>
-                            <span class="font-medium mt-0.5">Minggu, 19 April 2026</span>
-                        </div>
-                        <div class="flex items-start gap-3 text-slate-600 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 text-blue-500"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                            <span class="font-medium mt-0.5 leading-relaxed">Pendaftaran: Senin, 23 Februari 2026 -
-                                Jumat, 17 April 2026</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <span
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 text-[11px] font-bold rounded-lg border border-blue-100/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                            </svg> E-Sertifikat
-                        </span>
-                        <span
-                            class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 text-[11px] font-bold rounded-lg border border-amber-100/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                            </svg> Pembahasan
-                        </span>
-                    </div>
-                    <div class="mt-auto pt-5 border-t border-slate-100">
-                        <div class="flex items-center justify-between mb-5">
-                            <span class="text-2xl font-black text-slate-900 tracking-tight">Rp 50.000</span>
-                            <span
-                                class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="12" cy="7" r="4"></circle>
-                                </svg> 54 Peserta
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <a href="#"
-                                class="flex items-center gap-1.5 text-sm font-bold text-slate-400 hover:text-blue-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                                </svg> Panduan
-                            </a>
-                            <a href="#"
+                        <div class="pt-5 border-t border-slate-100 flex justify-end">
+                            <a href="{{ route('competitions') }}"
                                 class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[15px] font-bold rounded-full transition-all shadow-lg shadow-blue-200 active:scale-95 flex items-center gap-2">
-                                Daftar <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M5 12h14"></path>
-                                    <path d="m12 5 7 7-7 7"></path>
-                                </svg>
+                                Lihat Detail
                             </a>
                         </div>
                     </div>
+
                 </div>
-            </div>
+            @empty
+                <div class="col-span-full text-center py-10 text-slate-500 font-bold">
+                    Belum ada kompetisi yang aktif saat ini.
+                </div>
+            @endforelse
 
         </div>
     </section>
