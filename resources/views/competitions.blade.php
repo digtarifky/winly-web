@@ -336,7 +336,8 @@
                             <div>
                                 <h2 class="text-xl font-extrabold text-slate-900">Registrasi Kompetisi</h2>
                                 <p class="text-sm font-semibold text-slate-500 mt-1"><span x-text="compName"></span> -
-                                    <span class="text-blue-600" x-text="bidang"></span></p>
+                                    <span class="text-blue-600" x-text="bidang"></span>
+                                </p>
                             </div>
                             <button type="button" @click="showModal = false"
                                 class="p-2 bg-white hover:bg-slate-200 rounded-full transition-colors">
@@ -459,41 +460,64 @@
                 const filterBtns = document.querySelectorAll('.filter-btn');
                 const cards = document.querySelectorAll('.lomba-card');
 
+                // Tangkap kotak pencarian (bisa membaca yang ada di dalam Navbar)
+                const searchInputs = document.querySelectorAll('.search-input');
+
+                // Event listener saat user mengetik
+                searchInputs.forEach(input => {
+                    input.addEventListener('input', () => {
+                        // Sinkronkan input desktop dan mobile
+                        searchInputs.forEach(otherInput => {
+                            if (otherInput !== input) otherInput.value = input.value;
+                        });
+                        filterCards();
+                    });
+                });
+
                 filterBtns.forEach(btn => {
                     btn.addEventListener('click', () => {
                         const group = btn.getAttribute('data-group');
-
                         document.querySelectorAll(`.filter-btn[data-group="${group}"]`).forEach(b => {
                             b.classList.remove('bg-blue-50', 'text-blue-700');
                             b.classList.add('text-slate-600', 'hover:bg-slate-50');
                         });
-
                         btn.classList.remove('text-slate-600', 'hover:bg-slate-50');
                         btn.classList.add('bg-blue-50', 'text-blue-700');
-
                         filterCards();
                     });
                 });
 
                 function filterCards() {
-                    const activeTingkat = document.querySelector('.filter-btn[data-group="tingkat"].bg-blue-50')
-                        .getAttribute('data-filter');
-                    const activeKategori = document.querySelector('.filter-btn[data-group="kategori"].bg-blue-50')
-                        .getAttribute('data-filter');
-                    const activeBiaya = document.querySelector('.filter-btn[data-group="biaya"].bg-blue-50')
-                        .getAttribute('data-filter');
+                    // Karena ini JS, kita butuh pengaman agar tidak error jika tombol filter belum dirender
+                    const btnTingkat = document.querySelector('.filter-btn[data-group="tingkat"].bg-blue-50');
+                    const btnKategori = document.querySelector('.filter-btn[data-group="kategori"].bg-blue-50');
+                    const btnBiaya = document.querySelector('.filter-btn[data-group="biaya"].bg-blue-50');
+
+                    const activeTingkat = btnTingkat ? btnTingkat.getAttribute('data-filter') : 'semua';
+                    const activeKategori = btnKategori ? btnKategori.getAttribute('data-filter') : 'semua';
+                    const activeBiaya = btnBiaya ? btnBiaya.getAttribute('data-filter') : 'semua';
+
+                    // Ambil teks pencarian
+                    const searchQuery = searchInputs[0] ? searchInputs[0].value.toLowerCase() : '';
 
                     cards.forEach(card => {
                         const cardTingkat = card.getAttribute('data-tingkat') || '';
                         const cardKategori = card.getAttribute('data-kategori') || '';
                         const cardBiaya = card.getAttribute('data-biaya') || '';
 
+                        // Ambil judul lomba dari kartu
+                        const titleElement = card.querySelector('h3');
+                        const judulLomba = titleElement ? titleElement.textContent.toLowerCase() : '';
+
                         const matchTingkat = (activeTingkat === 'semua') || cardTingkat.includes(activeTingkat);
                         const matchKategori = (activeKategori === 'semua') || cardKategori.includes(
                             activeKategori);
                         const matchBiaya = (activeBiaya === 'semua') || cardBiaya.includes(activeBiaya);
 
-                        if (matchTingkat && matchKategori && matchBiaya) {
+                        // Cocokkan judul lomba dengan teks pencarian
+                        const matchSearch = judulLomba.includes(searchQuery);
+
+                        if (matchTingkat && matchKategori && matchBiaya && matchSearch) {
                             card.style.display = 'flex';
                             card.style.animation = 'fadeIn 0.4s ease-in-out';
                         } else {
