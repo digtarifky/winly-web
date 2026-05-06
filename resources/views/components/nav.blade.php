@@ -77,8 +77,7 @@
             @auth
                 <div class="flex items-center space-x-2 md:space-x-4">
                     @php
-                        $dashboardUrl =
-                            auth()->user()->role === 'peserta' ? route('home') : route('penyelenggara.dashboard');
+                        $dashboardUrl = auth()->user()->role === 'peserta' ? route('profile.index') : route('penyelenggara.dashboard');
                     @endphp
                     <a href="{{ $dashboardUrl }}"
                         class="flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition font-bold text-xs md:text-base whitespace-nowrap">
