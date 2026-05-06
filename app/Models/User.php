@@ -80,4 +80,22 @@ class User extends Authenticatable
     {
         return $this->hasMany(Registration::class);
     }
+
+    // Relasi One-to-One ke tabel profil
+    public function profile()
+    {
+        return $this->hasOne(PesertaProfile::class);
+    }
+
+    public function isProfileComplete()
+    {
+        $profile = $this->profile;
+        if (!$profile) return false;
+
+        // Cek kolom wajib yang tidak boleh kosong
+        return !empty($profile->nama_lengkap) && 
+               !empty($profile->no_wa) && 
+               !empty($profile->asal_instansi) && 
+               !empty($profile->tingkat_pendidikan);
+    }
 }
