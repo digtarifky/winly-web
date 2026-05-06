@@ -209,6 +209,10 @@
 
                     <template x-for="(item, index) in bidangs" :key="item.id">
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 relative group">
+
+                            <input type="hidden" :name="`bidang[${index}][id]`" x-model="item.id"
+                                x-show="item.id.toString().length < 10">
+
                             <button type="button" @click="removeBidang(item.id)" x-show="bidangs.length > 1"
                                 class="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
 

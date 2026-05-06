@@ -125,34 +125,79 @@ class OrganizerController extends Controller
         return view('penyelenggara.edit', compact('lomba'));
     }
 
-    // 5. Memproses Data Update
+   // 5. Memproses Data Update (BESERTA BUG FIX BIDANG & WA)
     public function update(Request $request, $id)
     {
         $lomba = Competition::where('user_id', Auth::id())->findOrFail($id);
 
+        // 1. Validasi Data yang Masuk (Termasuk validasi Bidang)
         $request->validate([
             'judul_lomba' => 'required|string|max:255',
             'tanggal_pelaksanaan' => 'required|date',
             'link_panduan' => 'nullable|url',
             'poster' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'benefits' => 'nullable|array',
+            
+            // Wajib memvalidasi array bidang agar aman
+            'bidang' => 'required|array|min:1',
+            'bidang.*.nama_bidang' => 'required|string',
+            'bidang.*.harga' => 'required|numeric|min:0',
+            'bidang.*.link_wa' => 'required|url',
         ]);
 
-        // Cek jika ada poster baru yang diupload
-        if ($request->hasFile('poster')) {
-            $posterPath = $request->file('poster')->store('posters', 'public');
-            $lomba->poster = $posterPath;
+        DB::beginTransaction();
+        try {
+            // 2. Proses Poster (Sama seperti aslimu)
+            if ($request->hasFile('poster')) {
+                $posterPath = $request->file('poster')->store('posters', 'public');
+                $lomba->poster = $posterPath;
+            }
+
+            // 3. Update Data Induk Lomba
+            $lomba->update([
+                'judul_lomba' => $request->judul_lomba,
+                'kategori' => $request->kategori,
+                'tingkat_sekolah' => $request->tingkat_sekolah,
+                'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+                'link_panduan' => $request->link_panduan,
+                'benefits' => $request->benefits ? json_encode($request->benefits) : null,
+            ]);
+
+            // =======================================================
+            // 4. FIX BUG: PROSES SINKRONISASI BIDANG & LINK WA
+            // =======================================================
+            $submittedFieldIds = [];
+
+            if ($request->has('bidang')) {
+                foreach ($request->bidang as $item) {
+                    $field = \App\Models\CompetitionField::updateOrCreate(
+                        [
+                            'id' => $item['id'] ?? null, 
+                            'competition_id' => $lomba->id
+                        ],
+                        [
+                            'nama_bidang' => $item['nama_bidang'],
+                            'tipe_pendaftaran' => $item['harga'] == 0 ? 'gratis' : 'berbayar',
+                            'harga' => $item['harga'],
+                            'link_wa' => $item['link_wa'],
+                        ]
+                    );
+                    
+                    $submittedFieldIds[] = $field->id;
+                }
+            }
+
+            \App\Models\CompetitionField::where('competition_id', $lomba->id)
+                ->whereNotIn('id', $submittedFieldIds)
+                ->delete();
+
+            DB::commit();
+            return redirect()->route('penyelenggara.dashboard')->with('success', 'Data lomba dan bidang berhasil diperbarui!');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors('Terjadi kesalahan saat update data: ' . $e->getMessage())->withInput();
         }
-
-        $lomba->update([
-            'judul_lomba' => $request->judul_lomba,
-            'kategori' => $request->kategori,
-            'tingkat_sekolah' => $request->tingkat_sekolah,
-            'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
-            'link_panduan' => $request->link_panduan,
-            'benefits' => $request->benefits ? json_encode($request->benefits) : null,
-        ]);
-
-        return redirect()->route('penyelenggara.dashboard')->with('success', 'Data lomba berhasil diperbarui!');
     }
 
     // 6. Menghapus Lomba
