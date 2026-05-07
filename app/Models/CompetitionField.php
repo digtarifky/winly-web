@@ -20,6 +20,6 @@ class CompetitionField extends Model
     // 2. Relasi ke Registrations (Satu bidang ini bisa diikuti oleh BANYAK pendaftar/peserta)
     public function registrations()
     {
-        return $this->hasMany(Registration::class);
+        return $this->hasMany(Registration::class, 'competition_field_id');
     }
 }

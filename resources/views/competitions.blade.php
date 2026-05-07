@@ -133,13 +133,12 @@
 
 
             // card kompetisi
-
             <div class="flex flex-col lg:flex-row gap-8 items-start relative">
 
                 <x-sidebar-filter />
 
                 <div class="flex-grow w-full min-w-0">
-                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 w-full">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
 
                         @forelse($competitions as $lomba)
                             @php
@@ -149,6 +148,7 @@
                                 $hasPremium =
                                     $lomba->fields->contains('tipe_pendaftaran', 'berbayar') ||
                                     $lomba->fields->contains('tipe_pendaftaran', 'pilihan');
+
                                 $minPrice = $lomba->fields->min('harga');
                                 $maxPrice = $lomba->fields->max('harga');
 
@@ -165,7 +165,7 @@
                                     : json_decode($lomba->benefits, true) ?? [];
                             @endphp
 
-                            <div <div data-tingkat="{{ strtolower($lomba->tingkat_sekolah ?? '') }}"
+                            <div data-tingkat="{{ strtolower($lomba->tingkat_sekolah ?? '') }}"
                                 data-kategori="{{ strtolower($lomba->kategori ?? '') }}"
                                 data-biaya="{{ $hasGratis ? 'gratis' : '' }} {{ $hasPremium ? 'premium' : '' }}"
                                 class="lomba-card bg-white rounded-[24px] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col group hover:-translate-y-1 transition-all duration-300 relative z-0">
@@ -188,7 +188,9 @@
 
                                 <div class="p-6 flex flex-col flex-grow rounded-b-[24px]">
                                     <h3 class="text-lg font-black text-slate-900 leading-tight mb-4 line-clamp-2"
-                                        title="{{ $lomba->judul_lomba }}">{{ $lomba->judul_lomba }}</h3>
+                                        title="{{ $lomba->judul_lomba }}">
+                                        {{ $lomba->judul_lomba }}
+                                    </h3>
 
                                     <div class="space-y-3 mb-6">
                                         <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
@@ -245,7 +247,6 @@
                                             </svg>
                                             Panduan
                                         </a>
-
 
                                         <div class="relative">
                                             @auth
@@ -308,8 +309,7 @@
                                                             @endforelse
                                                         </div>
                                                     @else
-                                                        <button type="button"
-                                                            onclick="alert('Ups! Kamu harus melengkapi Data Profil (Nama, WA, Sekolah) terlebih dahulu sebelum mendaftar lomba.'); window.location.href='{{ route('profile.index') }}';"
+                                                        <button type="button" @click="$dispatch('open-profile-alert')"
                                                             class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
                                                             Daftar
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
@@ -336,153 +336,204 @@
                                     </div>
                                 </div>
                             </div>
-                    </div>
-                    @empty
-                        <div
-                            class="col-span-full py-20 text-center flex flex-col items-center bg-white rounded-[32px] shadow-sm border border-slate-100">
-                            <span class="text-6xl mb-4 block">📭</span>
-                            <h3 class="text-xl font-bold text-slate-800">Belum ada kompetisi yang aktif</h3>
-                            <p class="text-slate-500 mt-2">Coba kembali lagi nanti ya, Sobat Winly!</p>
-                        </div>
-                        @endforelse
+                            @empty
+                                <div
+                                    class="col-span-full py-20 text-center flex flex-col items-center bg-white rounded-[32px] shadow-sm border border-slate-100">
+                                    <span class="text-6xl mb-4 block">📭</span>
+                                    <h3 class="text-xl font-bold text-slate-800">Belum ada kompetisi yang aktif</h3>
+                                    <p class="text-slate-500 mt-2">Coba kembali lagi nanti ya, Sobat Winly!</p>
+                                </div>
+                            @endforelse
 
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div x-show="showModal" style="display: none;"
-                class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                <div x-show="showModal" style="display: none;"
+                    class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
 
-                <div x-show="showModal" @click="showModal = false"
-                    class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+                    <div x-show="showModal" @click="showModal = false"
+                        class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
 
-                <form action="{{ route('registrations.store') }}" method="POST" enctype="multipart/form-data"
-                    x-show="showModal"
-                    class="bg-white w-full max-w-2xl rounded-[24px] overflow-hidden shadow-2xl relative z-10 border border-slate-100 flex flex-col max-h-[90vh]">
+                    <form action="{{ route('registrations.store') }}" method="POST" enctype="multipart/form-data"
+                        x-show="showModal"
+                        class="bg-white w-full max-w-2xl rounded-[24px] overflow-hidden shadow-2xl relative z-10 border border-slate-100 flex flex-col max-h-[90vh]">
 
-                    @csrf
-                    <input type="hidden" name="field_id" :value="fieldId">
-                    <input type="hidden" name="jalur" :value="price === 'Gratis' ? 'gratis' : 'berbayar'">
+                        @csrf
+                        <input type="hidden" name="field_id" :value="fieldId">
+                        <input type="hidden" name="jalur" :value="price === 'Gratis' ? 'gratis' : 'berbayar'">
 
-                    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
-                        <div>
-                            <h2 class="text-xl font-extrabold text-slate-900">Registrasi Kompetisi</h2>
-                            <p class="text-sm font-semibold text-slate-500 mt-1"><span x-text="compName"></span> -
-                                <span class="text-blue-600" x-text="bidang"></span>
-                            </p>
-                        </div>
-                        <button type="button" @click="showModal = false"
-                            class="p-2 bg-white hover:bg-slate-200 rounded-full transition-colors">
-                            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="p-6 overflow-y-auto custom-scrollbar flex-grow">
-                        <div x-show="price !== 'Gratis'" style="display: none;">
-                            <div class="bg-blue-50/40 border border-blue-100 rounded-xl p-5 mb-2">
-                                <h4 class="font-extrabold text-slate-800 mb-3 text-sm">Keuntungan Registrasi Berbayar:
-                                </h4>
-                                <ul class="space-y-2.5">
-                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
-                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        Pembayaran otomatis terverifikasi via sistem
-                                    </li>
-                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
-                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        Tidak perlu repot upload bukti Follow/Share
-                                    </li>
-                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
-                                        <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        Proses registrasi lebih cepat & prioritas
-                                    </li>
-                                </ul>
+                        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
+                            <div>
+                                <h2 class="text-xl font-extrabold text-slate-900">Registrasi Kompetisi</h2>
+                                <p class="text-sm font-semibold text-slate-500 mt-1"><span x-text="compName"></span> -
+                                    <span class="text-blue-600" x-text="bidang"></span>
+                                </p>
                             </div>
-                        </div>
-
-                        <div x-show="price === 'Gratis'" style="display: none;" class="space-y-4">
-                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-2">
-                                <p class="text-sm text-amber-800 font-semibold">⚠️ Jalur gratis mewajibkan Anda untuk
-                                    mengupload 3 bukti persyaratan di bawah ini.</p>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">1. Bukti Follow IG
-                                        <span class="text-red-500">*</span></label>
-                                    <input type="file" name="bukti_follow" :required="price === 'Gratis'"
-                                        accept=".jpg,.jpeg,.png,.pdf"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">2. Bukti Share Poster
-                                        <span class="text-red-500">*</span></label>
-                                    <input type="file" name="bukti_share" :required="price === 'Gratis'"
-                                        accept=".jpg,.jpeg,.png,.pdf"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">3. Bukti Tag/Komen di
-                                        Postingan <span class="text-red-500">*</span></label>
-                                    <input type="file" name="bukti_komentar" :required="price === 'Gratis'"
-                                        accept=".jpg,.jpeg,.png,.pdf"
-                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                </div>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mt-1">*Format file wajib JPG, PNG, atau PDF (Maks. 2MB
-                                per file).</p>
-                        </div>
-                    </div>
-
-                    <div
-                        class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between rounded-b-[24px]">
-
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-slate-500">Total:</span>
-                            <span class="text-2xl font-black"
-                                :class="price === 'Gratis' ? 'text-green-600' : 'text-slate-900'" x-text="price"></span>
-                        </div>
-
-                        <div class="flex gap-3">
                             <button type="button" @click="showModal = false"
-                                class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
-
-                            <button type="submit"
-                                class="px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2"
-                                :class="price === 'Gratis' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' :
-                                    'bg-[#10B981] hover:bg-[#059669] shadow-green-200'">
-                                <span x-text="price === 'Gratis' ? 'Kirim Pendaftaran' : 'Lanjut Bayar'"></span>
-                                <svg x-show="price !== 'Gratis'" class="w-4 h-4" fill="none" stroke="currentColor"
+                                class="p-2 bg-white hover:bg-slate-200 rounded-full transition-colors">
+                                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>
                         </div>
-                    </div>
-                </form>
-            </div>
+
+                        <div class="p-6 overflow-y-auto custom-scrollbar flex-grow">
+                            <div x-show="price !== 'Gratis'" style="display: none;">
+                                <div class="bg-blue-50/40 border border-blue-100 rounded-xl p-5 mb-2">
+                                    <h4 class="font-extrabold text-slate-800 mb-3 text-sm">Keuntungan Registrasi Berbayar:
+                                    </h4>
+                                    <ul class="space-y-2.5">
+                                        <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
+                                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Pembayaran otomatis terverifikasi via sistem
+                                        </li>
+                                        <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
+                                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Tidak perlu repot upload bukti Follow/Share
+                                        </li>
+                                        <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium">
+                                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                            Proses registrasi lebih cepat & prioritas
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div x-show="price === 'Gratis'" style="display: none;" class="space-y-4">
+                                <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-2">
+                                    <p class="text-sm text-amber-800 font-semibold">⚠️ Jalur gratis mewajibkan Anda untuk
+                                        mengupload 3 bukti persyaratan di bawah ini.</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">1. Bukti Follow IG
+                                            <span class="text-red-500">*</span></label>
+                                        <input type="file" name="bukti_follow" :required="price === 'Gratis'"
+                                            accept=".jpg,.jpeg,.png,.pdf"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">2. Bukti Share Poster
+                                            <span class="text-red-500">*</span></label>
+                                        <input type="file" name="bukti_share" :required="price === 'Gratis'"
+                                            accept=".jpg,.jpeg,.png,.pdf"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">3. Bukti Tag/Komen di
+                                            Postingan <span class="text-red-500">*</span></label>
+                                        <input type="file" name="bukti_komentar" :required="price === 'Gratis'"
+                                            accept=".jpg,.jpeg,.png,.pdf"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">*Format file wajib JPG, PNG, atau PDF (Maks. 2MB
+                                    per file).</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between rounded-b-[24px]">
+
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-slate-500">Total:</span>
+                                <span class="text-2xl font-black"
+                                    :class="price === 'Gratis' ? 'text-green-600' : 'text-slate-900'"
+                                    x-text="price"></span>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button type="button" @click="showModal = false"
+                                    class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
+
+                                <button type="submit"
+                                    class="px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                                    :class="price === 'Gratis' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' :
+                                        'bg-[#10B981] hover:bg-[#059669] shadow-green-200'">
+                                    <span x-text="price === 'Gratis' ? 'Kirim Pendaftaran' : 'Lanjut Bayar'"></span>
+                                    <svg x-show="price !== 'Gratis'" class="w-4 h-4" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             </div>
         </main>
 
         <x-footer />
+
+        // animasi profile belum diisi
+        <div x-data="{ isProfileAlertOpen: false }" @open-profile-alert.window="isProfileAlertOpen = true">
+
+            <div x-show="isProfileAlertOpen" style="display: none;"
+                class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6"
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90"
+                x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
+
+                <div x-show="isProfileAlertOpen" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                    @click="isProfileAlertOpen = false" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"></div>
+
+                <div x-show="isProfileAlertOpen"
+                    class="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl relative z-10 border border-slate-100 flex flex-col p-8 md:p-10 text-center">
+
+                    <div
+                        class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 border border-blue-100 mb-6">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+
+                    <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-3">Ups! Profil Kamu Belum Lengkap!
+                    </h3>
+                    <p class="text-slate-600 font-medium mb-8">Untuk mendaftar lomba, pastikan kamu sudah melengkapi data
+                        **Nama Lengkap**, **Nomor WA**, dan **Asal Sekolah** di halaman profil terlebih dahulu.</p>
+
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center pt-6 border-t border-slate-100">
+                        <button type="button" @click="isProfileAlertOpen = false"
+                            class="px-8 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full transition-colors text-sm active:scale-95">
+                            Nanti Saja
+                        </button>
+
+                        <a href="{{ route('profile.index') }}" @click="isProfileAlertOpen = false"
+                            class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all active:scale-95 shadow-lg shadow-blue-200 text-sm flex items-center justify-center gap-2">
+                            Lengkapi Profil Sekarang
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

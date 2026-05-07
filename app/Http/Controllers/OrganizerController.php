@@ -14,16 +14,38 @@ class OrganizerController extends Controller
     public function index()
     {
         $user = Auth::user();
-        // Ambil data lomba yang pernah dibuat oleh user ini
+        
+        // 1. Ambil data lomba milik panitia ini
         $competitions = Competition::where('user_id', $user->id)->latest()->get();
 
-        return view('penyelenggara.index', compact('user', 'competitions'));
-    }
+        // Ambil array ID lomba milik panitia ini untuk filter
+        $competitionIds = $competitions->pluck('id')->toArray();
 
-    // 2. Menampilkan Form Tambah Lomba
-    public function create()
-    {
-        return view('penyelenggara.create');
+        // 2. Ambil SEMUA data pendaftar (registrations) yang nyangkut di lomba milik panitia
+        $registrations = \App\Models\Registration::with(['user.profile', 'field.competition'])
+            ->whereHas('field', function ($query) use ($competitionIds) {
+                $query->whereIn('competition_id', $competitionIds);
+            })
+            ->latest()
+            ->get();
+
+        // 3. Hitung Data untuk 3 Kotak Statistik
+        $totalPendaftar = $registrations->count();
+        
+        // Asumsi: status_pembayaran 'sukses' artinya Terverifikasi (Aman)
+        $pesertaValid = $registrations->where('status_pembayaran', 'sukses')->count();
+        
+        // Asumsi: status_pembayaran 'pending' artinya butuh cek bukti (Gratis) atau nunggu bayar (Premium)
+        $pesertaPending = $registrations->whereIn('status_pembayaran', ['pending', 'menunggu_verifikasi'])->count();
+
+        return view('penyelenggara.index', compact(
+            'user', 
+            'competitions', 
+            'registrations', 
+            'totalPendaftar', 
+            'pesertaValid', 
+            'pesertaPending'
+        ));
     }
 
     // 3. Memproses Data dari Form Tambah Lomba

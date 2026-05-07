@@ -78,11 +78,6 @@
                             <option value="Umum" {{ $profile->tingkat_pendidikan == 'Umum' ? 'selected' : '' }}>Umum</option>
                         </select>
                     </div>
-                    
-                    <div x-show="editMode" x-collapse>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Upload Kartu Pelajar (Opsional)</label>
-                        <input type="file" name="foto_kartu_pelajar" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 p-1 border border-slate-200 rounded-xl">
-                    </div>
                 </div>
 
                 <div x-show="editMode" x-collapse class="pt-6 border-t border-slate-100 flex justify-end">

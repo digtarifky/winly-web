@@ -18,6 +18,8 @@ Route::get('/', function () {
         ->get();
    return view('home', ['latestCompetitions' => $latestCompetitions]);
 })->name('home');
+Route::redirect('/home', '/');
+
 
 Route::get('/news', function () {
     return view('news');

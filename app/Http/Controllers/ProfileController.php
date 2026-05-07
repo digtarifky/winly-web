@@ -13,7 +13,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         $profile = $user->profile()->firstOrCreate([]); 
         
-        return view('peserta.profile.index', compact('user', 'profile'));
+        return view('profile', compact('user', 'profile'));
     }
 
     public function update(Request $request)
@@ -33,15 +33,5 @@ class ProfileController extends Controller
 
         ]);
 
-        $profile = $user->profile;
-
-        if ($request->hasFile('foto_kartu_pelajar')) {
-            $path = $request->file('foto_kartu_pelajar')->store('kartu_pelajar', 'public');
-            $profile->foto_kartu_pelajar = $path;
-        }
-
-        $profile->update($request->except(['foto_kartu_pelajar', '_token']));
-
-        return back()->with('success', 'Profil berhasil diperbarui! Sekarang kamu bisa mendaftar lomba.');
     }
 }
