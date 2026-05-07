@@ -219,7 +219,7 @@
                 </div>
 
                 <div class="pt-6 border-t border-slate-100 flex justify-end gap-3">
-                    <a href="{{ route('penyelenggara.dashboard') }}"
+                    <a href="{{ route('penyelenggara.manajemen') }}"
                         class="px-6 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-full">Batal</a>
                     <button type="submit"
                         class="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-full shadow-lg transition-transform active:scale-95">

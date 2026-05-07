@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PesertaExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Competition;
 use App\Models\CompetitionField;
 use Illuminate\Http\Request;
@@ -10,6 +12,15 @@ use Illuminate\Support\Facades\DB;
 
 class OrganizerController extends Controller
 {
+    // Fungsi untuk Download Excel
+    public function exportExcel()
+    {
+        $user = Auth::user();
+        $namaFile = 'Data_Peserta_Valid_Winly_' . date('Ymd') . '.xlsx';
+        
+        return Excel::download(new PesertaExport($user->id), $namaFile);
+    }
+
     // 1. Menampilkan Dashboard Penyelenggara
     public function index()
     {
@@ -38,7 +49,7 @@ class OrganizerController extends Controller
         // Asumsi: status_pembayaran 'pending' artinya butuh cek bukti (Gratis) atau nunggu bayar (Premium)
         $pesertaPending = $registrations->whereIn('status_pembayaran', ['pending', 'menunggu_verifikasi'])->count();
 
-        return view('penyelenggara.index', compact(
+        return view('penyelenggara.dashboard', compact(
             'user', 
             'competitions', 
             'registrations', 
@@ -46,6 +57,23 @@ class OrganizerController extends Controller
             'pesertaValid', 
             'pesertaPending'
         ));
+    }
+
+    // 2. Fungsi Form Buat Lomba (BARU DITAMBAHKAN)
+    public function manajemen() 
+    {
+        $user = Auth::user(); 
+        $competitions = \App\Models\Competition::where('user_id', $user->id)->latest()->get();
+        
+        // Pastikan nama file blade-nya sudah kamu ubah jadi manajemen-lomba.blade.php
+        return view('penyelenggara.manajemen', compact('user', 'competitions')); 
+    }
+
+    // Khusus untuk memanggil form kosong tambah lomba
+    public function create()
+    {
+        // Pastikan ini memanggil file form buatanmu (bukan memanggil index lagi)
+        return view('penyelenggara.create'); 
     }
 
     // 3. Memproses Data dari Form Tambah Lomba

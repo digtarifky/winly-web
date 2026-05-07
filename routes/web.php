@@ -81,6 +81,7 @@ Route::middleware('auth')->group(function () {
 // ==========================================
 Route::prefix('penyelenggara')->name('penyelenggara.')->group(function () {
     Route::get('/dashboard', [OrganizerController::class, 'index'])->name('dashboard');
+    Route::get('/manajemen', [OrganizerController::class, 'manajemen'])->name('manajemen');
     Route::get('/buat-lomba', [OrganizerController::class, 'create'])->name('create');
     Route::post('/buat-lomba', [OrganizerController::class, 'store'])->name('store');
     Route::get('/edit-lomba/{id}', [OrganizerController::class, 'edit'])->name('edit');
@@ -89,6 +90,8 @@ Route::prefix('penyelenggara')->name('penyelenggara.')->group(function () {
     // Rute Pembayaran QRIS Mockup
     Route::get('/pembayaran-lomba/{id}', [OrganizerController::class, 'payment'])->name('payment');
     Route::post('/pembayaran-lomba/{id}/konfirmasi', [OrganizerController::class, 'confirmPayment'])->name('confirmPayment');
+    // export excel
+    Route::get('/export-peserta', [OrganizerController::class, 'exportExcel'])->name('export.excel');
 });
 
 Route::get('/competitions', [PublicController::class, 'competitions'])->name('competitions');
