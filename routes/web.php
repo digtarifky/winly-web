@@ -101,7 +101,7 @@ Route::get('/competitions', [PublicController::class, 'competitions'])->name('co
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
-    Route::post('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/registrations/store', [RegistrationController::class, 'store'])->name('registrations.store');
     Route::get('/payment/{id}', [RegistrationController::class, 'payment'])->name('peserta.payment');
     Route::post('/payment/{id}/confirm', [RegistrationController::class, 'confirmPayment'])->name('peserta.payment.confirm');

@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class PesertaProfile extends Model
 {
+    protected $fillable = [
+        'user_id',
+        'nama_lengkap',
+        'tempat_lahir',
+        'tanggal_lahir',
+        'jenis_kelamin',
+        'no_wa',
+        'alamat',
+        'tingkat_pendidikan',
+        'asal_instansi',
+    ];
+
     use HasFactory;
     protected $guarded = ['id'];
 

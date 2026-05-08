@@ -18,20 +18,28 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
-            'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
             'no_wa' => 'required|string|max:20',
-            'alamat' => 'nullable|string',
             'tingkat_pendidikan' => 'required|in:SD,SMP,SMA,Mahasiswa,Umum',
             'asal_instansi' => 'required|string|max:255',
-            'nisn_nim' => 'nullable|string|max:50',
 
         ]);
+
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id], 
+            [
+                'nama_lengkap' => $request->nama_lengkap,
+                'no_wa' => $request->no_wa,
+                'tingkat_pendidikan' => $request->tingkat_pendidikan,
+                'asal_instansi' => $request->asal_instansi,
+            ]
+        );
+
+        return back()->with('success', 'Profil berhasil disimpan!');
 
     }
 }
