@@ -155,16 +155,140 @@
                                         {{ $reg->jalur }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-5 text-right">
+                                <td class="px-4 py-5 text-right" x-data="{ showModal: false }">
                                     @if ($reg->status_pembayaran === 'sukses')
                                         <span
                                             class="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black">TERVERIFIKASI
                                             ✅</span>
+                                    @elseif($reg->status_pembayaran === 'gagal')
+                                        <span
+                                            class="px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-[10px] font-black">DITOLAK
+                                            ❌</span>
                                     @else
-                                        <button
-                                            class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-full text-[10px] font-black transition-colors">
-                                            CEK BUKTI 🔍
+                                        <button @click="showModal = true"
+                                            class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-full text-[10px] font-black transition-colors uppercase">
+                                            Cek Bukti
                                         </button>
+
+                                        <template x-teleport="body">
+                                            <div x-show="showModal" style="display: none;"
+                                                class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+
+                                                <div @click.away="showModal = false" x-transition
+                                                    class="bg-white rounded-[24px] w-full max-w-3xl max-h-[90vh] shadow-2xl flex flex-col text-left overflow-hidden">
+
+                                                    <div
+                                                        class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+                                                        <div>
+                                                            <h3 class="text-xl font-extrabold text-slate-900">
+                                                                Verifikasi Bukti Pendaftaran</h3>
+                                                            <p class="text-sm text-slate-500 font-medium mt-1">Peserta:
+                                                                {{ $reg->user->profile->nama_lengkap ?? 'User' }}</p>
+                                                        </div>
+                                                        <button @click="showModal = false"
+                                                            class="w-8 h-8 flex items-center justify-center bg-white text-slate-400 hover:text-red-500 rounded-full shadow-sm">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+
+                                                    <div class="p-6 overflow-y-auto flex-1">
+                                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                            <div>
+                                                                <p
+                                                                    class="text-xs font-bold text-slate-500 uppercase mb-2">
+                                                                    Bukti Follow</p>
+                                                                @if ($reg->bukti_follow)
+                                                                    <a href="{{ asset('storage/' . $reg->bukti_follow) }}"
+                                                                        target="_blank">
+                                                                        <img src="{{ asset('storage/' . $reg->bukti_follow) }}"
+                                                                            alt="Bukti Follow"
+                                                                            class="w-full h-48 object-cover rounded-xl border border-slate-200 hover:opacity-80 transition">
+                                                                    </a>
+                                                                @else
+                                                                    <div
+                                                                        class="w-full h-48 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 text-sm font-medium border border-slate-200">
+                                                                        Tidak ada foto</div>
+                                                                @endif
+                                                            </div>
+
+                                                            <div>
+                                                                <p
+                                                                    class="text-xs font-bold text-slate-500 uppercase mb-2">
+                                                                    Bukti Share</p>
+                                                                @if ($reg->bukti_share)
+                                                                    <a href="{{ asset('storage/' . $reg->bukti_share) }}"
+                                                                        target="_blank">
+                                                                        <img src="{{ asset('storage/' . $reg->bukti_share) }}"
+                                                                            alt="Bukti Share"
+                                                                            class="w-full h-48 object-cover rounded-xl border border-slate-200 hover:opacity-80 transition">
+                                                                    </a>
+                                                                @else
+                                                                    <div
+                                                                        class="w-full h-48 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 text-sm font-medium border border-slate-200">
+                                                                        Tidak ada foto</div>
+                                                                @endif
+                                                            </div>
+
+                                                            <div>
+                                                                <p
+                                                                    class="text-xs font-bold text-slate-500 uppercase mb-2">
+                                                                    Bukti Komentar</p>
+                                                                @if ($reg->bukti_komentar)
+                                                                    <a href="{{ asset('storage/' . $reg->bukti_komentar) }}"
+                                                                        target="_blank">
+                                                                        <img src="{{ asset('storage/' . $reg->bukti_komentar) }}"
+                                                                            alt="Bukti Komentar"
+                                                                            class="w-full h-48 object-cover rounded-xl border border-slate-200 hover:opacity-80 transition">
+                                                                    </a>
+                                                                @else
+                                                                    <div
+                                                                        class="w-full h-48 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 text-sm font-medium border border-slate-200">
+                                                                        Tidak ada foto</div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-4 text-xs text-slate-400 text-center">*Klik foto
+                                                            untuk melihat ukuran penuh</div>
+                                                    </div>
+
+                                                    <div
+                                                        class="p-6 border-t border-slate-100 flex gap-3 justify-end bg-slate-50 shrink-0">
+                                                        <form
+                                                            action="{{ route('penyelenggara.pendaftaran.verify', $reg->id) }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="gagal">
+                                                            <button type="submit"
+                                                                class="px-5 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl transition text-sm">
+                                                                Tolak Pendaftaran
+                                                            </button>
+                                                        </form>
+
+                                                        <form
+                                                            action="{{ route('penyelenggara.pendaftaran.verify', $reg->id) }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="status" value="sukses">
+                                                            <button type="submit"
+                                                                class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition text-sm flex items-center gap-2">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M5 13l4 4L19 7"></path>
+                                                                </svg>
+                                                                Verifikasi Peserta
+                                                            </button>
+                                                        </form>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </template>
                                     @endif
                                 </td>
                             </tr>

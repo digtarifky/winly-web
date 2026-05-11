@@ -10,6 +10,9 @@ use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ProfileController;
 
+// ==========================================
+// AREA PUBLIK (Bisa diakses siapa saja)
+// ==========================================
 Route::get('/', function () {
     $latestCompetitions = \App\Models\Competition::with('fields')
         ->withCount('registrations')
@@ -19,97 +22,78 @@ Route::get('/', function () {
         ->get();
    return view('home', ['latestCompetitions' => $latestCompetitions]);
 })->name('home');
-Route::redirect('/home', '/');
-
 
 Route::get('/news', function () {
     return view('news');
 })->name('news');
 
+Route::get('/competitions', [PublicController::class, 'competitions'])->name('competitions');
 
-// Hanya untuk yang BELUM login
+
+// ==========================================
+// AREA GUEST (Hanya untuk yang BELUM login)
+// ==========================================
 Route::middleware('guest')->group(function () {
-    // Rute Register
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
     
-    // Rute Login
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
 
-// Logout
+
+// ==========================================
+// AREA AUTH (Harus Login - Peserta)
+// ==========================================
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-//login
 Route::middleware('auth')->group(function () {
 
-    // Route untuk memproses form pendaftaran (Controller yang baru kita buat)
-    Route::post('/registrations', [RegistrationController::class, 'store'])->name('registrations.store');
+    // Dashboard Peserta
+    Route::get('/home', function () {
+        $registrations = Registration::where('user_id', Auth::id())
+                                     ->with('field.competition')
+                                     ->latest()
+                                     ->get();
+        return view('home', ['registrations' => $registrations]);
+    })->name('dashboard');
 
-    // Route khusus Penyelenggara
-    Route::get('/penyelenggara/dashboard', function () {
-        return view('penyelenggara.index');
-    })->name('penyelenggara.dashboard');
+    // Profil & Pesanan
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/pesanan', [ProfileController::class, 'pesanan'])->name('pesanan');
     
-});
-
-// Route daftar kompetisi
-Route::get('/competitions', [CompetitionController::class, 'index'])->name('competitions');
-
-// Route untuk Dashboard Peserta
-Route::get('/home', function () {
-    $registrations = Registration::where('user_id', Auth::id())
-                                 ->with('field.competition')
-                                 ->latest()
-                                 ->get();
-    
-    return view('home', [
-        'registrations' => $registrations
-    ]);
-})->name('dashboard');
-
-//pembayaran peserta
-Route::middleware('auth')->group(function () {
-    Route::controller(RegistrationController::class)->group(function () {
-        Route::get('/peserta/pembayaran/{id}', 'payment')->name('peserta.payment');
-        Route::post('/peserta/pembayaran/{id}/konfirmasi', 'confirmPayment')->name('peserta.payment.confirm');
-    });
+    // Pendaftaran & Pembayaran
+    Route::post('/registrations/store', [RegistrationController::class, 'store'])->name('registrations.store');
+    Route::get('/peserta/pembayaran/{id}', [RegistrationController::class, 'payment'])->name('peserta.payment');
+    Route::post('/peserta/pembayaran/{id}/konfirmasi', [RegistrationController::class, 'confirmPayment'])->name('peserta.payment.confirm');
 
 });
 
-// AREA PENYELENGGARA
+
 // ==========================================
-Route::prefix('penyelenggara')->name('penyelenggara.')->group(function () {
+// AREA PENYELENGGARA (Panitia)
+// ==========================================
+// Semua di dalam sini otomatis diawali url /penyelenggara/ dan nama rute penyelenggara.
+Route::prefix('penyelenggara')->name('penyelenggara.')->middleware('auth')->group(function () {
+    
     Route::get('/dashboard', [OrganizerController::class, 'index'])->name('dashboard');
     Route::get('/manajemen', [OrganizerController::class, 'manajemen'])->name('manajemen');
+    
+    // Manajemen Lomba
     Route::get('/buat-lomba', [OrganizerController::class, 'create'])->name('create');
     Route::post('/buat-lomba', [OrganizerController::class, 'store'])->name('store');
     Route::get('/edit-lomba/{id}', [OrganizerController::class, 'edit'])->name('edit');
     Route::put('/update-lomba/{id}', [OrganizerController::class, 'update'])->name('update');
     Route::delete('/hapus-lomba/{id}', [OrganizerController::class, 'destroy'])->name('destroy');
-    // Rute Pembayaran QRIS Mockup
+    
+    // Pembayaran QRIS Penyelenggara
     Route::get('/pembayaran-lomba/{id}', [OrganizerController::class, 'payment'])->name('payment');
     Route::post('/pembayaran-lomba/{id}/konfirmasi', [OrganizerController::class, 'confirmPayment'])->name('confirmPayment');
-    // export excel
-    Route::get('/export-peserta', [OrganizerController::class, 'exportExcel'])->name('export.excel');
-});
-
-Route::get('/competitions', [PublicController::class, 'competitions'])->name('competitions');
-
-// AREA PESERTA (Pendaftaran & Pembayaran Tiket Lomba)
-// ========================================================
-Route::middleware(['auth'])->group(function () {
-
-    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
-    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/registrations/store', [RegistrationController::class, 'store'])->name('registrations.store');
-    Route::get('/payment/{id}', [RegistrationController::class, 'payment'])->name('peserta.payment');
-    Route::post('/payment/{id}/confirm', [RegistrationController::class, 'confirmPayment'])->name('peserta.payment.confirm');
-        // tagihan pembayaran 
-    Route::get('/pesanan', [ProfileController::class, 'pesanan'])->name('pesanan');
     
+    // Export Excel
+    Route::get('/export-peserta', [OrganizerController::class, 'exportExcel'])->name('export.excel');
+
+    // VERIFIKASI BUKTI PENDAFTARAN 
+    Route::post('/pendaftaran/{id}/verifikasi', [OrganizerController::class, 'verify'])->name('pendaftaran.verify');
 });
-
-
-

@@ -316,4 +316,23 @@ class OrganizerController extends Controller
 
         return redirect()->route('penyelenggara.dashboard')->with('success', 'Pembayaran berhasil dikonfirmasi dan dicatat di sistem! Lomba Anda sekarang AKTIF.');
     }
+
+        // 9. Verifikasi Pendaftaran Peserta (Dari Halaman Dashboard Penyelenggara)
+    public function verify(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:sukses,gagal'
+        ]);
+
+        $registration = \App\Models\Registration::findOrFail($id);
+
+        // Update statusnya
+        $registration->update([
+            'status_pembayaran' => $request->status
+        ]);
+
+        $pesan = $request->status === 'sukses' ? 'Peserta berhasil diverifikasi! ✅' : 'Pendaftaran peserta ditolak. ❌';
+        return back()->with('success', $pesan);
+    }
+
 }

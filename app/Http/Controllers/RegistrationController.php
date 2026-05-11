@@ -49,7 +49,7 @@ class RegistrationController extends Controller
             'bukti_follow' => $pathFollow,
             'bukti_share' => $pathShare,
             'bukti_komentar' => $pathKomentar,
-            'status_pembayaran' => $request->jalur === 'gratis' ? 'sukses' : 'menunggu',
+            'status_pembayaran' => $request->jalur === 'gratis' ? 'menunggu_verifikasi' : 'menunggu',
         ]);
 
 
