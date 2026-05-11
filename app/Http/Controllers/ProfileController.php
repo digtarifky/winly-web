@@ -42,4 +42,18 @@ class ProfileController extends Controller
         return back()->with('success', 'Profil berhasil disimpan!');
 
     }
+
+    public function pesanan()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Ambil semua riwayat pendaftaran/pesanan milik peserta ini
+        $pesanan = \App\Models\Registration::with('field.competition')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        return view('pesanan', compact('user', 'pesanan'));
+    }
 }

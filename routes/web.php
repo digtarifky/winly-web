@@ -8,6 +8,7 @@ use App\Models\Registration;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     $latestCompetitions = \App\Models\Competition::with('fields')
@@ -105,6 +106,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/registrations/store', [RegistrationController::class, 'store'])->name('registrations.store');
     Route::get('/payment/{id}', [RegistrationController::class, 'payment'])->name('peserta.payment');
     Route::post('/payment/{id}/confirm', [RegistrationController::class, 'confirmPayment'])->name('peserta.payment.confirm');
+        // tagihan pembayaran 
+    Route::get('/pesanan', [ProfileController::class, 'pesanan'])->name('pesanan');
     
 });
 
