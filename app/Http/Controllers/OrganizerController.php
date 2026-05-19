@@ -46,8 +46,12 @@ class OrganizerController extends Controller
         // Asumsi: status_pembayaran 'sukses' artinya Terverifikasi (Aman)
         $pesertaValid = $registrations->where('status_pembayaran', 'sukses')->count();
         
-        // Asumsi: status_pembayaran 'pending' artinya butuh cek bukti (Gratis) atau nunggu bayar (Premium)
-        $pesertaPending = $registrations->whereIn('status_pembayaran', ['pending', 'menunggu_verifikasi'])->count();
+        // Asumsi: status_pembayaran 'menunggu' (bayar nanti) dan 'menunggu_verifikasi' (gratis)
+        $pesertaPending = $registrations->whereIn('status_pembayaran', ['menunggu', 'menunggu_verifikasi'])->count();
+
+        // 4. PISAHKAN DATA UNTUK DITAMPILKAN DI TABEL (PENTING!)
+        $pendingRegistrations = $registrations->whereIn('status_pembayaran', ['menunggu', 'menunggu_verifikasi']);
+        $validRegistrations = $registrations->where('status_pembayaran', 'sukses');
 
         return view('penyelenggara.dashboard', compact(
             'user', 
@@ -55,7 +59,9 @@ class OrganizerController extends Controller
             'registrations', 
             'totalPendaftar', 
             'pesertaValid', 
-            'pesertaPending'
+            'pesertaPending',
+            'pendingRegistrations', // Tambahan data tabel pending
+            'validRegistrations'    // Tambahan data tabel valid
         ));
     }
 

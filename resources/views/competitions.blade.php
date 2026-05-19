@@ -132,7 +132,7 @@
             @endif
 
 
-            // card kompetisi
+            {{-- card kompetisi --}}
             <div class="flex flex-col lg:flex-row gap-8 items-start relative">
 
                 <x-sidebar-filter />
