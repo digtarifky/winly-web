@@ -171,6 +171,34 @@
                                 class="w-full text-sm text-slate-800 border border-slate-200 rounded-xl p-2.5 bg-white">
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Pendaftaran
+                                Dibuka</label>
+                            <input type="date" name="tgl_buka_pendaftaran"
+                                value="{{ old('tgl_buka_pendaftaran', $lomba->tgl_buka_pendaftaran) }}"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Pendaftaran
+                                Ditutup</label>
+                            <input type="date" name="tgl_tutup_pendaftaran"
+                                value="{{ old('tgl_tutup_pendaftaran', $lomba->tgl_tutup_pendaftaran) }}"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kuota
+                                Maksimal Peserta</label>
+                            <input type="number" name="kuota_peserta"
+                                value="{{ old('kuota_peserta', $lomba->kuota_peserta) }}" min="1"
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-4">

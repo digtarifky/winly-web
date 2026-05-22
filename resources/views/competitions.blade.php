@@ -187,12 +187,13 @@
                                 </div>
 
                                 <div class="p-6 flex flex-col flex-grow rounded-b-[24px]">
-                                    <h3 class="text-lg font-black text-slate-900 leading-tight mb-4 line-clamp-2"
+
+                                    <h3 class="text-lg font-black text-slate-900 leading-tight mb-4 line-clamp-2 h-[3.5rem]"
                                         title="{{ $lomba->judul_lomba }}">
                                         {{ $lomba->judul_lomba }}
                                     </h3>
 
-                                    <div class="space-y-3 mb-6">
+                                    <div class="space-y-3 mb-5">
                                         <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
                                             <svg class="w-5 h-5 text-indigo-500 flex-shrink-0" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -202,12 +203,27 @@
                                             </svg>
                                             <span>{{ \Carbon\Carbon::parse($lomba->tanggal_pelaksanaan)->translatedFormat('l, d F Y') }}</span>
                                         </div>
+
+                                        <div class="flex items-center gap-3 text-sm font-medium">
+                                            <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <div class="text-slate-600 flex flex-wrap items-center gap-1.5">
+                                                <span>Daftar:</span>
+                                                <span class="text-amber-600 text-xs font-bold">
+                                                    {{ date('d M', strtotime($lomba->tgl_buka_pendaftaran)) }} -
+                                                    {{ date('d M Y', strtotime($lomba->tgl_tutup_pendaftaran)) }}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="flex flex-wrap gap-2 mb-6 mt-auto">
                                         @forelse($benefits as $ben)
                                             <span
-                                                class="px-3 py-1.5 bg-indigo-50/50 text-indigo-600 text-[11px] font-bold rounded-lg border border-indigo-100 flex items-center gap-1.5">
+                                                class="px-2.5 py-1 bg-indigo-50/50 text-indigo-600 text-[10px] font-bold rounded-lg border border-indigo-100 flex items-center gap-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -221,10 +237,12 @@
                                         @endforelse
                                     </div>
 
-                                    <div class="flex items-center justify-between mb-6">
-                                        <span class="text-xl font-black text-slate-900">{{ $priceSummary }}</span>
+                                    <div class="flex flex-row items-center justify-between gap-3 mb-6">
+                                        <span
+                                            class="text-lg font-black text-slate-900 leading-tight">{{ $priceSummary }}</span>
+
                                         <div
-                                            class="bg-indigo-50 text-indigo-600 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-indigo-100">
+                                            class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-indigo-100 flex-shrink-0 whitespace-nowrap">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -237,8 +255,9 @@
 
                                     <div class="pt-5 border-t border-slate-100 flex items-center justify-between relative"
                                         x-data="{ showDropdown: false }">
+
                                         <a href="{{ $lomba->link_panduan ?? '#' }}" target="_blank"
-                                            class="flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors font-bold text-sm">
+                                            class="flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors font-bold text-xs">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -254,7 +273,7 @@
                                                     @if (auth()->user()->isProfileComplete())
                                                         <button @click="showDropdown = !showDropdown"
                                                             @click.away="showDropdown = false"
-                                                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
+                                                            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
                                                             Daftar
                                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                                 class="w-4 h-4 transition-transform"
@@ -310,7 +329,7 @@
                                                         </div>
                                                     @else
                                                         <button type="button" @click="$dispatch('open-profile-alert')"
-                                                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
+                                                            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
                                                             Daftar
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -322,13 +341,13 @@
                                                 @else
                                                     <button type="button"
                                                         onclick="alert('Role Penyelenggara tidak dapat mendaftar lomba.');"
-                                                        class="bg-slate-400 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg cursor-not-allowed">
+                                                        class="bg-slate-400 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg cursor-not-allowed">
                                                         Daftar
                                                     </button>
                                                 @endif
                                             @else
                                                 <a href="{{ route('login') }}"
-                                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
+                                                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
                                                     Daftar
                                                 </a>
                                             @endauth

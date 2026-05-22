@@ -17,7 +17,7 @@ class OrganizerController extends Controller
     {
         $user = Auth::user();
         $namaFile = 'Data_Peserta_Valid_Winly_' . date('Ymd') . '.xlsx';
-        
+
         return Excel::download(new PesertaExport($user->id), $namaFile);
     }
 
@@ -25,7 +25,7 @@ class OrganizerController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // 1. Ambil data lomba milik panitia ini
         $competitions = Competition::where('user_id', $user->id)->latest()->get();
 
@@ -42,10 +42,10 @@ class OrganizerController extends Controller
 
         // 3. Hitung Data untuk 3 Kotak Statistik
         $totalPendaftar = $registrations->count();
-        
+
         // Asumsi: status_pembayaran 'sukses' artinya Terverifikasi (Aman)
         $pesertaValid = $registrations->where('status_pembayaran', 'sukses')->count();
-        
+
         // Asumsi: status_pembayaran 'menunggu' (bayar nanti) dan 'menunggu_verifikasi' (gratis)
         $pesertaPending = $registrations->whereIn('status_pembayaran', ['menunggu', 'menunggu_verifikasi'])->count();
 
@@ -54,11 +54,11 @@ class OrganizerController extends Controller
         $validRegistrations = $registrations->where('status_pembayaran', 'sukses');
 
         return view('penyelenggara.dashboard', compact(
-            'user', 
-            'competitions', 
-            'registrations', 
-            'totalPendaftar', 
-            'pesertaValid', 
+            'user',
+            'competitions',
+            'registrations',
+            'totalPendaftar',
+            'pesertaValid',
             'pesertaPending',
             'pendingRegistrations', // Tambahan data tabel pending
             'validRegistrations'    // Tambahan data tabel valid
@@ -66,32 +66,38 @@ class OrganizerController extends Controller
     }
 
     // 2. Fungsi Form Buat Lomba (BARU DITAMBAHKAN)
-    public function manajemen() 
+    public function manajemen()
     {
-        $user = Auth::user(); 
+        $user = Auth::user();
         $competitions = \App\Models\Competition::where('user_id', $user->id)->latest()->get();
-        
+
         // Pastikan nama file blade-nya sudah kamu ubah jadi manajemen-lomba.blade.php
-        return view('penyelenggara.manajemen', compact('user', 'competitions')); 
+        return view('penyelenggara.manajemen', compact('user', 'competitions'));
     }
 
     // Khusus untuk memanggil form kosong tambah lomba
     public function create()
     {
         // Pastikan ini memanggil file form buatanmu (bukan memanggil index lagi)
-        return view('penyelenggara.create'); 
+        return view('penyelenggara.create');
     }
 
     // 3. Memproses Data dari Form Tambah Lomba
     public function store(Request $request)
     {
-        // A. Validasi Data yang Masuk
+        // A. TAMBAHKAN VALIDASI BARU DI SINI 👇
         $request->validate([
             'judul_lomba' => 'required|string|max:255',
             'kategori' => 'required|string|in:akademik,teknologi_it,ekonomi_bisnis,karya_tulis,seni_desain,kesehatan,soshum_hukum',
             'tingkat_sekolah' => 'required|string|in:sd,smp,sma,mahasiswa',
             'tingkat_lomba' => 'required|in:kota,umum,provinsi,nasional,internasional',
             'tanggal_pelaksanaan' => 'nullable|date',
+
+            // Validasi aturan baru Winly
+            'tgl_buka_pendaftaran' => 'required|date',
+            'tgl_tutup_pendaftaran' => 'required|date|after_or_equal:tgl_buka_pendaftaran',
+            'kuota_peserta' => 'required|integer|min:1',
+
             'link_panduan' => 'nullable|url',
             'poster' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'benefits' => 'nullable|array',
@@ -102,23 +108,18 @@ class OrganizerController extends Controller
             'bidang.*.link_wa' => 'required|url',
         ]);
 
-        // B. Mulai Transaksi Database
         DB::beginTransaction();
         try {
             /** @var \App\Models\User $user */
             $user = Auth::user();
 
-            // C. Proses Upload Poster
             $posterPath = null;
             if ($request->hasFile('poster')) {
                 $posterPath = $request->file('poster')->store('posters', 'public');
             }
 
-            // D. Logika Potong Kuota & Penentuan Berbayar
             $status = 'draf';
             $isPaid = false;
-
-            // Ubah input jadi huruf kecil semua agar aman
             $tingkat = strtolower($request->tingkat_lomba);
 
             if (in_array($tingkat, ['kota', 'umum'])) {
@@ -132,7 +133,7 @@ class OrganizerController extends Controller
                 $isPaid = true;
             }
 
-            // E. Simpan ke tabel Competitions
+            // B. MASUKKAN DATA BARU KE DATABASE DI SINI 👇
             $competition = Competition::create([
                 'user_id' => $user->id,
                 'judul_lomba' => $request->judul_lomba,
@@ -141,13 +142,19 @@ class OrganizerController extends Controller
                 'deskripsi' => $request->deskripsi ?? 'Deskripsi belum tersedia.',
                 'poster' => $posterPath,
                 'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+
+                // Kolom baru
+                'tgl_buka_pendaftaran' => $request->tgl_buka_pendaftaran,
+                'tgl_tutup_pendaftaran' => $request->tgl_tutup_pendaftaran,
+                'kuota_peserta' => $request->kuota_peserta,
+                'is_pendaftaran_tutup' => false,
+
                 'tingkat_lomba' => $request->tingkat_lomba,
                 'link_panduan' => $request->link_panduan,
                 'status' => $status,
                 'benefits' => $request->benefits ? json_encode($request->benefits) : null,
             ]);
 
-            // F. Looping untuk menyimpan banyak Bidang sekaligus
             foreach ($request->bidang as $item) {
                 $tipe = $item['harga'] == 0 ? 'gratis' : 'berbayar';
                 CompetitionField::create([
@@ -161,14 +168,12 @@ class OrganizerController extends Controller
 
             DB::commit();
 
-            // Jika lomba berbayar, lempar ke halaman QRIS
             if ($isPaid) {
                 return redirect()->route('penyelenggara.payment', $competition->id);
             }
 
             return redirect()->route('penyelenggara.dashboard')->with('success', 'Lomba berhasil diterbitkan!');
         } catch (\Exception $e) {
-
             DB::rollback();
             return back()->withErrors('Terjadi kesalahan sistem: ' . $e->getMessage())->withInput();
         }
@@ -181,20 +186,24 @@ class OrganizerController extends Controller
         return view('penyelenggara.edit', compact('lomba'));
     }
 
-   // 5. Memproses Data Update (BESERTA BUG FIX BIDANG & WA)
+    // 5. Memproses Data Update (BESERTA BUG FIX BIDANG & WA)
     public function update(Request $request, $id)
     {
         $lomba = Competition::where('user_id', Auth::id())->findOrFail($id);
 
-        // 1. Validasi Data yang Masuk (Termasuk validasi Bidang)
         $request->validate([
             'judul_lomba' => 'required|string|max:255',
             'tanggal_pelaksanaan' => 'required|date',
+
+            // Validasi kolom baru saat update
+            'tgl_buka_pendaftaran' => 'required|date',
+            'tgl_tutup_pendaftaran' => 'required|date|after_or_equal:tgl_buka_pendaftaran',
+            'kuota_peserta' => 'required|integer|min:1',
+
             'link_panduan' => 'nullable|url',
             'poster' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'benefits' => 'nullable|array',
-            
-            // Wajib memvalidasi array bidang agar aman
+
             'bidang' => 'required|array|min:1',
             'bidang.*.nama_bidang' => 'required|string',
             'bidang.*.harga' => 'required|numeric|min:0',
@@ -203,32 +212,33 @@ class OrganizerController extends Controller
 
         DB::beginTransaction();
         try {
-            // 2. Proses Poster (Sama seperti aslimu)
             if ($request->hasFile('poster')) {
                 $posterPath = $request->file('poster')->store('posters', 'public');
                 $lomba->poster = $posterPath;
             }
 
-            // 3. Update Data Induk Lomba
+            // UPDATE DATA TERMASUK KOLOM BARU 👇
             $lomba->update([
                 'judul_lomba' => $request->judul_lomba,
                 'kategori' => $request->kategori,
                 'tingkat_sekolah' => $request->tingkat_sekolah,
                 'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+
+                // Kolom baru
+                'tgl_buka_pendaftaran' => $request->tgl_buka_pendaftaran,
+                'tgl_tutup_pendaftaran' => $request->tgl_tutup_pendaftaran,
+                'kuota_peserta' => $request->kuota_peserta,
+
                 'link_panduan' => $request->link_panduan,
                 'benefits' => $request->benefits ? json_encode($request->benefits) : null,
             ]);
 
-            // =======================================================
-            // 4. FIX BUG: PROSES SINKRONISASI BIDANG & LINK WA
-            // =======================================================
             $submittedFieldIds = [];
-
             if ($request->has('bidang')) {
                 foreach ($request->bidang as $item) {
                     $field = \App\Models\CompetitionField::updateOrCreate(
                         [
-                            'id' => $item['id'] ?? null, 
+                            'id' => $item['id'] ?? null,
                             'competition_id' => $lomba->id
                         ],
                         [
@@ -238,7 +248,6 @@ class OrganizerController extends Controller
                             'link_wa' => $item['link_wa'],
                         ]
                     );
-                    
                     $submittedFieldIds[] = $field->id;
                 }
             }
@@ -248,8 +257,7 @@ class OrganizerController extends Controller
                 ->delete();
 
             DB::commit();
-            return redirect()->route('penyelenggara.dashboard')->with('success', 'Data lomba dan bidang berhasil diperbarui!');
-            
+            return redirect()->route('penyelenggara.dashboard')->with('success', 'Data lomba berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors('Terjadi kesalahan saat update data: ' . $e->getMessage())->withInput();
@@ -323,7 +331,7 @@ class OrganizerController extends Controller
         return redirect()->route('penyelenggara.dashboard')->with('success', 'Pembayaran berhasil dikonfirmasi dan dicatat di sistem! Lomba Anda sekarang AKTIF.');
     }
 
-        // 9. Verifikasi Pendaftaran Peserta (Dari Halaman Dashboard Penyelenggara)
+    // 9. Verifikasi Pendaftaran Peserta (Dari Halaman Dashboard Penyelenggara)
     public function verify(Request $request, $id)
     {
         $request->validate([
@@ -340,5 +348,4 @@ class OrganizerController extends Controller
         $pesan = $request->status === 'sukses' ? 'Peserta berhasil diverifikasi! ✅' : 'Pendaftaran peserta ditolak. ❌';
         return back()->with('success', $pesan);
     }
-
 }

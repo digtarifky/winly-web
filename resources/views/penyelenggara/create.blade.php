@@ -79,7 +79,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-2">Kategori Lomba <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">Kategori Lomba <span
+                                class="text-red-500">*</span></label>
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                             @php
                                 $categories = [
@@ -89,40 +90,47 @@
                                     'karya_tulis' => 'Karya Tulis & Riset',
                                     'seni_desain' => 'Seni & Desain',
                                     'kesehatan' => 'Kesehatan & Medis',
-                                    'soshum_hukum' => 'Soshum & Hukum'
+                                    'soshum_hukum' => 'Soshum & Hukum',
                                 ];
                             @endphp
 
-                            @foreach($categories as $value => $label)
-                            <label class="relative cursor-pointer h-full">
-                                <input type="radio" name="kategori" value="{{ $value }}" class="peer sr-only" required>
-                                <div class="h-full p-3 rounded-xl border-2 border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-slate-50 transition-all flex items-center justify-center text-center">
-                                    <span class="block text-xs font-bold text-slate-800 peer-checked:text-blue-700 leading-tight">{{ $label }}</span>
-                                </div>
-                            </label>
+                            @foreach ($categories as $value => $label)
+                                <label class="relative cursor-pointer h-full">
+                                    <input type="radio" name="kategori" value="{{ $value }}"
+                                        class="peer sr-only" required>
+                                    <div
+                                        class="h-full p-3 rounded-xl border-2 border-slate-200 peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-slate-50 transition-all flex items-center justify-center text-center">
+                                        <span
+                                            class="block text-xs font-bold text-slate-800 peer-checked:text-blue-700 leading-tight">{{ $label }}</span>
+                                    </div>
+                                </label>
                             @endforeach
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-2">Tingkat Pendidikan <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-bold text-slate-700 mb-2">Tingkat Pendidikan <span
+                                class="text-red-500">*</span></label>
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                             @php
                                 $levels = [
                                     'sd' => 'Sekolah Dasar (SD)',
                                     'smp' => 'SMP / Sederajat',
                                     'sma' => 'SMA / SMK',
-                                    'mahasiswa' => 'Mahasiswa / Umum'
+                                    'mahasiswa' => 'Mahasiswa / Umum',
                                 ];
                             @endphp
 
-                            @foreach($levels as $value => $label)
-                            <label class="relative cursor-pointer h-full">
-                                <input type="radio" name="tingkat_sekolah" value="{{ $value }}" class="peer sr-only" required>
-                                <div class="h-full p-3 rounded-xl border-2 border-slate-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 hover:bg-slate-50 transition-all flex items-center justify-center text-center">
-                                    <span class="block text-xs font-bold text-slate-800 peer-checked:text-indigo-700 leading-tight">{{ $label }}</span>
-                                </div>
-                            </label>
+                            @foreach ($levels as $value => $label)
+                                <label class="relative cursor-pointer h-full">
+                                    <input type="radio" name="tingkat_sekolah" value="{{ $value }}"
+                                        class="peer sr-only" required>
+                                    <div
+                                        class="h-full p-3 rounded-xl border-2 border-slate-200 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 hover:bg-slate-50 transition-all flex items-center justify-center text-center">
+                                        <span
+                                            class="block text-xs font-bold text-slate-800 peer-checked:text-indigo-700 leading-tight">{{ $label }}</span>
+                                    </div>
+                                </label>
                             @endforeach
                         </div>
                     </div>
@@ -150,6 +158,36 @@
                                 class="w-full text-sm text-slate-800 border border-slate-200 rounded-xl p-2.5 bg-white">
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Pendaftaran
+                                    Dibuka</label>
+                                <input type="date" name="tgl_buka_pendaftaran"
+                                    value="{{ old('tgl_buka_pendaftaran') }}"
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors">
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Pendaftaran
+                                    Ditutup</label>
+                                <input type="date" name="tgl_tutup_pendaftaran"
+                                    value="{{ old('tgl_tutup_pendaftaran') }}"
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors">
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kuota
+                                    Maksimal Peserta</label>
+                                <input type="number" name="kuota_peserta" value="{{ old('kuota_peserta', 100) }}"
+                                    min="1"
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 transition-colors"
+                                    placeholder="Contoh: 100">
+                            </div>
+                        </div>
                 </div>
 
                 <div class="space-y-4">

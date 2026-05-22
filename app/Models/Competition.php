@@ -20,13 +20,15 @@ class Competition extends Model
         'deskripsi',
         'poster',
         'tanggal_pelaksanaan',
-        'tanggal_mulai_daftar',
-        'tanggal_selesai_daftar',
+        'tgl_buka_pendaftaran',
+        'tgl_tutup_pendaftaran',
         'status',
         'tingkat_lomba',
         'link_panduan',
         'status',
-        'benefits'
+        'benefits',
+        'kuota_peserta',
+        'is_pendaftaran_tutup',
     ];
 
     protected $casts = [
