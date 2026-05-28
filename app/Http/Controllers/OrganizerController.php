@@ -9,6 +9,7 @@ use App\Models\CompetitionField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class OrganizerController extends Controller
 {
@@ -176,6 +177,31 @@ class OrganizerController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors('Terjadi kesalahan sistem: ' . $e->getMessage())->withInput();
+        }
+
+        // 1. Ambil data lomba beserta hitungan jumlah peserta yang sudah terverifikasi/sukses
+        $lomba = Competition::withCount(['registrations' => function ($query) {
+            $query->where('status_pembayaran', 'sukses');
+        }])->findOrFail($competition_id);
+
+        $hariIni = Carbon::now()->startOfDay();
+        $tglBuka = Carbon::parse($lomba->tgl_buka_pendaftaran)->startOfDay();
+        $tglTutup = Carbon::parse($lomba->tgl_tutup_pendaftaran)->endOfDay();
+
+        // GEMBOK 1: VALIDASI WAKTU (OTOMATIS)
+        // ==========================================
+        if ($hariIni->lt($tglBuka)) {
+            return back()->withErrors('Pendaftaran lomba ini belum dibuka! Pendaftaran dibuka mulai tanggal ' . $tglBuka->format('d M Y'));
+        }
+
+        if ($hariIni->gt($tglTutup)) {
+            return back()->withErrors('Mohon maaf, pendaftaran lomba ini sudah ditutup karena telah melewati batas tanggal penutupan.');
+        }
+
+        // GEMBOK 2: VALIDASI KUOTA (OTOMATIS)
+        // ==========================================
+        if ($lomba->registrations_count >= $lomba->kuota_peserta) {
+            return back()->withErrors('Mohon maaf, pendaftaran tidak dapat dilanjutkan karena kuota peserta sudah terpenuhi (Penuh).');
         }
     }
 
@@ -346,6 +372,32 @@ class OrganizerController extends Controller
         ]);
 
         $pesan = $request->status === 'sukses' ? 'Peserta berhasil diverifikasi! ✅' : 'Pendaftaran peserta ditolak. ❌';
+        return back()->with('success', $pesan);
+    }
+
+    /**
+     * Fungsi untuk Gembok Ke-3: Saklar Tutup/Buka Pendaftaran Manual
+     */
+    public function toggleStatus(Request $request, $id)
+    {
+        // 1. Cari lomba berdasarkan ID dan pastikan itu milik panitia yang sedang login (Keamanan)
+        $lomba = \App\Models\Competition::where('user_id', auth()->id())->findOrFail($id);
+
+        // 2. Cek apakah saklar dikirim dalam keadaan menyala (dicentang)
+        // Checkbox di HTML jika dicentang akan ada nilainya, jika tidak dicentang dia tidak terkirim (false)
+        $isTutup = $request->has('is_pendaftaran_tutup');
+
+        // 3. Update kolom di database
+        $lomba->update([
+            'is_pendaftaran_tutup' => $isTutup
+        ]);
+
+        // 4. Siapkan pesan sukses dinamis berdasarkan statusnya
+        $pesan = $isTutup 
+            ? 'Rem Darurat ditarik: Pendaftaran lomba berhasil DITUTUP!' 
+            : 'Saklar dimatikan: Pendaftaran lomba kembali DIBUKA!';
+
+        // 5. Kembalikan ke halaman dashboard beserta notifikasi SweetAlert
         return back()->with('success', $pesan);
     }
 }

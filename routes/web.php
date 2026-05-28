@@ -86,6 +86,8 @@ Route::prefix('penyelenggara')->name('penyelenggara.')->middleware('auth')->grou
     Route::get('/edit-lomba/{id}', [OrganizerController::class, 'edit'])->name('edit');
     Route::put('/update-lomba/{id}', [OrganizerController::class, 'update'])->name('update');
     Route::delete('/hapus-lomba/{id}', [OrganizerController::class, 'destroy'])->name('destroy');
+    // Route untuk Toggle Buka/Tutup Pendaftaran Manual
+    Route::patch('/penyelenggara/lomba/{id}/toggle-status', [App\Http\Controllers\OrganizerController::class, 'toggleStatus'])->name('toggle-status');
     
     // Pembayaran QRIS Penyelenggara
     Route::get('/pembayaran-lomba/{id}', [OrganizerController::class, 'payment'])->name('payment');
