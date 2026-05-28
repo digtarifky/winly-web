@@ -93,9 +93,11 @@
                 </div>
 
                 <div class="flex flex-col items-start pr-10 md:pl-28">
-                    <span class="text-blue-200 text-sm md:text-base font-bold tracking-widest uppercase mb-1">Total Point</span>
+                    <span class="text-blue-200 text-sm md:text-base font-bold tracking-widest uppercase mb-1">Total
+                        Point</span>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-sm">1.350</span>
+                        <span
+                            class="text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-sm">1.350</span>
                         <span class="text-xl md:text-2xl font-semibold text-blue-200">pts</span>
                     </div>
                 </div>
@@ -117,7 +119,8 @@
             </div>
 
             @if ($errors->any())
-                <div class="mb-8 bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-xl font-bold text-sm shadow-sm">
+                <div
+                    class="mb-8 bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-xl font-bold text-sm shadow-sm">
                     <p class="mb-2">⚠️ Terjadi Kesalahan:</p>
                     <ul class="list-disc pl-5 font-medium">
                         @foreach ($errors->all() as $error)
@@ -136,8 +139,12 @@
 
                         @forelse($competitions as $lomba)
                             @php
-                                $hasGratis = $lomba->fields->contains('tipe_pendaftaran', 'gratis') || $lomba->fields->contains('tipe_pendaftaran', 'pilihan');
-                                $hasPremium = $lomba->fields->contains('tipe_pendaftaran', 'berbayar') || $lomba->fields->contains('tipe_pendaftaran', 'pilihan');
+                                $hasGratis =
+                                    $lomba->fields->contains('tipe_pendaftaran', 'gratis') ||
+                                    $lomba->fields->contains('tipe_pendaftaran', 'pilihan');
+                                $hasPremium =
+                                    $lomba->fields->contains('tipe_pendaftaran', 'berbayar') ||
+                                    $lomba->fields->contains('tipe_pendaftaran', 'pilihan');
 
                                 $minPrice = $lomba->fields->min('harga');
                                 $maxPrice = $lomba->fields->max('harga');
@@ -150,14 +157,20 @@
                                     $priceSummary = 'Rp ' . number_format($minPrice, 0, ',', '.');
                                 }
 
-                                $benefits = is_array($lomba->benefits) ? $lomba->benefits : json_decode($lomba->benefits, true) ?? [];
+                                $benefits = is_array($lomba->benefits)
+                                    ? $lomba->benefits
+                                    : json_decode($lomba->benefits, true) ?? [];
 
                                 // ==========================================
                                 // LOGIKA 3 GEMBOK WINLY (CARBON)
                                 // ==========================================
                                 $hariIni = \Carbon\Carbon::now()->startOfDay();
-                                $tglBuka = $lomba->tgl_buka_pendaftaran ? \Carbon\Carbon::parse($lomba->tgl_buka_pendaftaran)->startOfDay() : $hariIni;
-                                $tglTutup = $lomba->tgl_tutup_pendaftaran ? \Carbon\Carbon::parse($lomba->tgl_tutup_pendaftaran)->endOfDay() : $hariIni->copy()->addDays(30);
+                                $tglBuka = $lomba->tgl_buka_pendaftaran
+                                    ? \Carbon\Carbon::parse($lomba->tgl_buka_pendaftaran)->startOfDay()
+                                    : $hariIni;
+                                $tglTutup = $lomba->tgl_tutup_pendaftaran
+                                    ? \Carbon\Carbon::parse($lomba->tgl_tutup_pendaftaran)->endOfDay()
+                                    : $hariIni->copy()->addDays(30);
                                 $kuota = $lomba->kuota_peserta ?? 100;
 
                                 $sudahPenuh = ($lomba->registrations_count ?? 0) >= $kuota;
@@ -167,7 +180,7 @@
                             @endphp
 
                             {{-- HILANGKAN CARD JIKA LOMBA SUDAH TUTUP / PENUH --}}
-                            @if($tutupManual || $sudahPenuh || $lewatTanggal)
+                            @if ($tutupManual || $sudahPenuh || $lewatTanggal)
                                 @continue
                             @endif
 
@@ -182,32 +195,87 @@
                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                     <div class="absolute top-4 right-4 flex gap-1.5">
                                         @if ($hasGratis)
-                                            <span class="bg-green-100/90 text-green-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm border border-green-200 shadow-sm">FREE</span>
+                                            <span
+                                                class="bg-green-100/90 text-green-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm border border-green-200 shadow-sm">FREE</span>
                                         @endif
                                         @if ($hasPremium)
-                                            <span class="bg-blue-100/90 text-blue-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm border border-blue-200 shadow-sm">PREMIUM</span>
+                                            <span
+                                                class="bg-blue-100/90 text-blue-600 text-[10px] font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm border border-blue-200 shadow-sm">PREMIUM</span>
                                         @endif
                                     </div>
                                 </div>
 
                                 <div class="p-6 flex flex-col flex-grow rounded-b-[24px]">
 
-                                    <h3 class="text-lg font-black text-slate-900 leading-tight mb-4 line-clamp-2 h-[3.5rem]"
-                                        title="{{ $lomba->judul_lomba }}">
-                                        {{ $lomba->judul_lomba }}
-                                    </h3>
+                                    <div class="flex items-start justify-between gap-2 mb-4" x-data="{ showMenu: false }">
+                                        <h3 class="text-lg font-black text-slate-900 leading-tight line-clamp-2 h-[3.5rem] flex-grow"
+                                            title="{{ $lomba->judul_lomba }}">
+                                            {{ $lomba->judul_lomba }}
+                                        </h3>
+
+                                        <div class="relative flex-shrink-0 mb-2">
+                                            <button @click="showMenu = !showMenu" @click.away="showMenu = false"
+                                                class="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus:outline-none">
+                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+
+                                            <div x-show="showMenu" style="display: none;"
+                                                x-transition:enter="transition ease-out duration-100"
+                                                x-transition:enter-start="transform opacity-0 scale-95"
+                                                x-transition:enter-end="transform opacity-100 scale-100"
+                                                x-transition:leave="transition ease-in duration-75"
+                                                x-transition:leave-start="transform opacity-100 scale-100"
+                                                x-transition:leave-end="transform opacity-0 scale-95"
+                                                class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-30">
+
+                                                <a href="https://wa.me/?text=Halo!%20Cek%20lomba%20menarik%20ini%20di%20Winly:%20{{ urlencode($lomba->judul_lomba) }}%20-%20{{ url()->current() }}"
+                                                    target="_blank"
+                                                    class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-600 hover:text-green-600 hover:bg-green-50 transition-colors w-full text-left">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z">
+                                                        </path>
+                                                    </svg>
+                                                    Bagikan ke WA
+                                                </a>
+
+                                                <button
+                                                    class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors w-full text-left">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z">
+                                                        </path>
+                                                    </svg>
+                                                    Simpan Lomba
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="space-y-3 mb-5">
                                         <div class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                                            <svg class="w-5 h-5 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            <svg class="w-5 h-5 text-indigo-500 flex-shrink-0" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                </path>
                                             </svg>
                                             <span>{{ \Carbon\Carbon::parse($lomba->tanggal_pelaksanaan)->translatedFormat('l, d F Y') }}</span>
                                         </div>
 
                                         <div class="flex items-center gap-3 text-sm font-medium">
-                                            <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                             <div class="text-slate-600 flex flex-wrap items-center gap-1.5">
                                                 <span>Daftar:</span>
@@ -221,9 +289,13 @@
 
                                     <div class="flex flex-wrap gap-2 mb-6 mt-auto">
                                         @forelse($benefits as $ben)
-                                            <span class="px-2.5 py-1 bg-indigo-50/50 text-indigo-600 text-[10px] font-bold rounded-lg border border-indigo-100 flex items-center gap-1.5">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            <span
+                                                class="px-2.5 py-1 bg-indigo-50/50 text-indigo-600 text-[10px] font-bold rounded-lg border border-indigo-100 flex items-center gap-1.5">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
                                                 {{ $ben }}
                                             </span>
@@ -233,68 +305,129 @@
                                     </div>
 
                                     <div class="flex flex-row items-center justify-between gap-3 mb-6">
-                                        <span class="text-lg font-black text-slate-900 leading-tight">{{ $priceSummary }}</span>
-                                        <div class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-indigo-100 flex-shrink-0 whitespace-nowrap">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        <span
+                                            class="text-lg font-black text-slate-900 leading-tight">{{ $priceSummary }}</span>
+                                        <div
+                                            class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-indigo-100 flex-shrink-0 whitespace-nowrap">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                                                </path>
                                             </svg>
                                             {{ $lomba->registrations_count ?? 0 }} Peserta
                                         </div>
                                     </div>
 
-                                    <div class="pt-5 border-t border-slate-100 flex items-center justify-between relative" x-data="{ showDropdown: false }">
-                                        <a href="{{ $lomba->link_panduan ?? '#' }}" target="_blank" class="flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors font-bold text-xs">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    <div class="pt-5 border-t border-slate-100 flex items-center justify-between relative"
+                                        x-data="{ showDropdown: false }">
+                                        <a href="{{ $lomba->link_panduan ?? '#' }}" target="_blank"
+                                            class="flex items-center gap-1.5 text-slate-400 hover:text-indigo-600 transition-colors font-bold text-xs">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                </path>
                                             </svg>
                                             Panduan
                                         </a>
 
                                         <div class="relative">
-                                            @if($belumBuka)
-                                                <button type="button" class="bg-slate-200 text-slate-500 px-5 py-2 rounded-full text-xs font-bold cursor-not-allowed text-center">
+                                            @if ($belumBuka)
+                                                <button type="button"
+                                                    class="bg-slate-200 text-slate-500 px-5 py-2 rounded-full text-xs font-bold cursor-not-allowed text-center">
                                                     Belum Dibuka 🔒
                                                 </button>
                                             @else
                                                 @auth
                                                     @if (auth()->user()->role === 'peserta')
                                                         @if (auth()->user()->isProfileComplete())
-                                                            <button @click="showDropdown = !showDropdown" @click.away="showDropdown = false" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
+                                                            <button @click="showDropdown = !showDropdown"
+                                                                @click.away="showDropdown = false"
+                                                                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
                                                                 Daftar
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform" :class="showDropdown ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"></path></svg>
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                    class="w-4 h-4 transition-transform"
+                                                                    :class="showDropdown ? 'rotate-180' : ''"
+                                                                    viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2.5">
+                                                                    <path d="m6 9 6 6 6-6"></path>
+                                                                </svg>
                                                             </button>
 
-                                                            <div x-show="showDropdown" style="display: none;" class="absolute bottom-full right-0 mb-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 overflow-hidden">
-                                                                <div class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1 bg-slate-50/50">Pilih Bidang</div>
+                                                            <div x-show="showDropdown" style="display: none;"
+                                                                class="absolute bottom-full right-0 mb-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 overflow-hidden">
+                                                                <div
+                                                                    class="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 mb-1 bg-slate-50/50">
+                                                                    Pilih Bidang</div>
                                                                 @forelse($lomba->fields as $bidang)
                                                                     @php
                                                                         if ($bidang->tipe_pendaftaran === 'gratis') {
-                                                                            $mType = 'gratis_only'; $aTab = 'gratis'; $pText = 'Gratis'; $color = 'green';
-                                                                        } elseif ($bidang->tipe_pendaftaran === 'berbayar') {
-                                                                            $mType = 'berbayar_only'; $aTab = 'berbayar'; $pText = 'Rp ' . number_format($bidang->harga, 0, ',', '.'); $color = 'blue';
+                                                                            $mType = 'gratis_only';
+                                                                            $aTab = 'gratis';
+                                                                            $pText = 'Gratis';
+                                                                            $color = 'green';
+                                                                        } elseif (
+                                                                            $bidang->tipe_pendaftaran === 'berbayar'
+                                                                        ) {
+                                                                            $mType = 'berbayar_only';
+                                                                            $aTab = 'berbayar';
+                                                                            $pText =
+                                                                                'Rp ' .
+                                                                                number_format(
+                                                                                    $bidang->harga,
+                                                                                    0,
+                                                                                    ',',
+                                                                                    '.',
+                                                                                );
+                                                                            $color = 'blue';
                                                                         } else {
-                                                                            $mType = 'pilihan'; $aTab = 'gratis'; $pText = 'Rp ' . number_format($bidang->harga, 0, ',', '.'); $color = 'indigo';
+                                                                            $mType = 'pilihan';
+                                                                            $aTab = 'gratis';
+                                                                            $pText =
+                                                                                'Rp ' .
+                                                                                number_format(
+                                                                                    $bidang->harga,
+                                                                                    0,
+                                                                                    ',',
+                                                                                    '.',
+                                                                                );
+                                                                            $color = 'indigo';
                                                                         }
                                                                     @endphp
-                                                                    <button @click="compName = '{{ addslashes($lomba->judul_lomba) }}'; bidang = '{{ addslashes($bidang->nama_bidang) }}'; price = '{{ $pText }}'; modalType = '{{ $mType }}'; activeTab = '{{ $aTab }}'; fieldId = '{{ $bidang->id }}'; showModal = true; showDropdown = false;" class="block w-full flex justify-between items-center px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-{{ $color }}-50 hover:text-{{ $color }}-600 transition-colors border-t border-slate-50 first:border-t-0">
+                                                                    <button
+                                                                        @click="compName = '{{ addslashes($lomba->judul_lomba) }}'; bidang = '{{ addslashes($bidang->nama_bidang) }}'; price = '{{ $pText }}'; modalType = '{{ $mType }}'; activeTab = '{{ $aTab }}'; fieldId = '{{ $bidang->id }}'; showModal = true; showDropdown = false;"
+                                                                        class="block w-full flex justify-between items-center px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-{{ $color }}-50 hover:text-{{ $color }}-600 transition-colors border-t border-slate-50 first:border-t-0">
                                                                         <span>{{ $bidang->nama_bidang }}</span>
-                                                                        <span class="text-xs font-black text-{{ $color }}-500">{{ $pText }}</span>
+                                                                        <span
+                                                                            class="text-xs font-black text-{{ $color }}-500">{{ $pText }}</span>
                                                                     </button>
                                                                 @empty
-                                                                    <div class="px-4 py-3 text-xs text-slate-500 text-center">Belum ada bidang</div>
+                                                                    <div
+                                                                        class="px-4 py-3 text-xs text-slate-500 text-center">
+                                                                        Belum ada bidang</div>
                                                                 @endforelse
                                                             </div>
                                                         @else
-                                                            <button type="button" @click="$dispatch('open-profile-alert')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
+                                                            <button type="button"
+                                                                @click="$dispatch('open-profile-alert')"
+                                                                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
                                                                 Daftar
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"></path></svg>
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4"
+                                                                    viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2.5">
+                                                                    <path d="m6 9 6 6 6-6"></path>
+                                                                </svg>
                                                             </button>
                                                         @endif
                                                     @else
-                                                        <button type="button" onclick="alert('Role Penyelenggara tidak dapat mendaftar lomba.');" class="bg-slate-400 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg cursor-not-allowed">Daftar</button>
+                                                        <button type="button"
+                                                            onclick="alert('Role Penyelenggara tidak dapat mendaftar lomba.');"
+                                                            class="bg-slate-400 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg cursor-not-allowed">Daftar</button>
                                                     @endif
                                                 @else
-                                                    <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">Daftar</a>
+                                                    <a href="{{ route('login') }}"
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">Daftar</a>
                                                 @endauth
                                             @endif
                                         </div>
@@ -302,7 +435,8 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="col-span-full py-20 text-center flex flex-col items-center bg-white rounded-[32px] shadow-sm border border-slate-100">
+                            <div
+                                class="col-span-full py-20 text-center flex flex-col items-center bg-white rounded-[32px] shadow-sm border border-slate-100">
                                 <span class="text-6xl mb-4 block">📭</span>
                                 <h3 class="text-xl font-bold text-slate-800">Belum ada kompetisi yang aktif</h3>
                                 <p class="text-slate-500 mt-2">Coba kembali lagi nanti ya, Sobat Winly!</p>
@@ -313,10 +447,14 @@
                 </div>
             </div>
 
-            <div x-show="showModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-                <div x-show="showModal" @click="showModal = false" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+            <div x-show="showModal" style="display: none;"
+                class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                <div x-show="showModal" @click="showModal = false"
+                    class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
 
-                <form action="{{ route('registrations.store') }}" method="POST" enctype="multipart/form-data" x-show="showModal" class="bg-white w-full max-w-2xl rounded-[24px] overflow-hidden shadow-2xl relative z-10 border border-slate-100 flex flex-col max-h-[90vh]">
+                <form action="{{ route('registrations.store') }}" method="POST" enctype="multipart/form-data"
+                    x-show="showModal"
+                    class="bg-white w-full max-w-2xl rounded-[24px] overflow-hidden shadow-2xl relative z-10 border border-slate-100 flex flex-col max-h-[90vh]">
                     @csrf
                     <input type="hidden" name="field_id" :value="fieldId">
                     <input type="hidden" name="jalur" :value="price === 'Gratis' ? 'gratis' : 'berbayar'">
@@ -324,43 +462,98 @@
                     <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
                         <div>
                             <h2 class="text-xl font-extrabold text-slate-900">Registrasi Kompetisi</h2>
-                            <p class="text-sm font-semibold text-slate-500 mt-1"><span x-text="compName"></span> - <span class="text-blue-600" x-text="bidang"></span></p>
+                            <p class="text-sm font-semibold text-slate-500 mt-1"><span x-text="compName"></span> -
+                                <span class="text-blue-600" x-text="bidang"></span></p>
                         </div>
-                        <button type="button" @click="showModal = false" class="p-2 bg-white hover:bg-slate-200 rounded-full transition-colors">
-                            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <button type="button" @click="showModal = false"
+                            class="p-2 bg-white hover:bg-slate-200 rounded-full transition-colors">
+                            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
                         </button>
                     </div>
 
                     <div class="p-6 overflow-y-auto custom-scrollbar flex-grow">
                         <div x-show="price !== 'Gratis'" style="display: none;">
                             <div class="bg-blue-50/40 border border-blue-100 rounded-xl p-5 mb-2">
-                                <h4 class="font-extrabold text-slate-800 mb-3 text-sm">Keuntungan Registrasi Berbayar:</h4>
+                                <h4 class="font-extrabold text-slate-800 mb-3 text-sm">Keuntungan Registrasi Berbayar:
+                                </h4>
                                 <ul class="space-y-2.5">
-                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium"><svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>Pembayaran otomatis terverifikasi via sistem</li>
-                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium"><svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>Tidak perlu repot upload bukti Follow/Share</li>
-                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium"><svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>Proses registrasi lebih cepat & prioritas</li>
+                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium"><svg
+                                            class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>Pembayaran otomatis terverifikasi via sistem</li>
+                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium"><svg
+                                            class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>Tidak perlu repot upload bukti Follow/Share</li>
+                                    <li class="flex items-start gap-2.5 text-sm text-slate-600 font-medium"><svg
+                                            class="w-5 h-5 text-green-500 flex-shrink-0" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>Proses registrasi lebih cepat & prioritas</li>
                                 </ul>
                             </div>
                         </div>
 
                         <div x-show="price === 'Gratis'" style="display: none;" class="space-y-4">
-                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-2"><p class="text-sm text-amber-800 font-semibold">⚠️ Jalur gratis mewajibkan Anda untuk mengupload 3 bukti persyaratan di bawah ini.</p></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><label class="block text-xs font-bold text-slate-700 mb-1.5">1. Bukti Follow IG <span class="text-red-500">*</span></label><input type="file" name="bukti_follow" :required="price === 'Gratis'" accept=".jpg,.jpeg,.png,.pdf" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"></div>
-                                <div><label class="block text-xs font-bold text-slate-700 mb-1.5">2. Bukti Share Poster <span class="text-red-500">*</span></label><input type="file" name="bukti_share" :required="price === 'Gratis'" accept=".jpg,.jpeg,.png,.pdf" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"></div>
-                                <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-700 mb-1.5">3. Bukti Tag/Komen di Postingan <span class="text-red-500">*</span></label><input type="file" name="bukti_komentar" :required="price === 'Gratis'" accept=".jpg,.jpeg,.png,.pdf" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"></div>
+                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-2">
+                                <p class="text-sm text-amber-800 font-semibold">⚠️ Jalur gratis mewajibkan Anda untuk
+                                    mengupload 3 bukti persyaratan di bawah ini.</p>
                             </div>
-                            <p class="text-[11px] text-slate-400 mt-1">*Format file wajib JPG, PNG, atau PDF (Maks. 2MB per file).</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="block text-xs font-bold text-slate-700 mb-1.5">1. Bukti Follow IG
+                                        <span class="text-red-500">*</span></label><input type="file"
+                                        name="bukti_follow" :required="price === 'Gratis'"
+                                        accept=".jpg,.jpeg,.png,.pdf"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                </div>
+                                <div><label class="block text-xs font-bold text-slate-700 mb-1.5">2. Bukti Share Poster
+                                        <span class="text-red-500">*</span></label><input type="file"
+                                        name="bukti_share" :required="price === 'Gratis'"
+                                        accept=".jpg,.jpeg,.png,.pdf"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                </div>
+                                <div class="md:col-span-2"><label
+                                        class="block text-xs font-bold text-slate-700 mb-1.5">3. Bukti Tag/Komen di
+                                        Postingan <span class="text-red-500">*</span></label><input type="file"
+                                        name="bukti_komentar" :required="price === 'Gratis'"
+                                        accept=".jpg,.jpeg,.png,.pdf"
+                                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">*Format file wajib JPG, PNG, atau PDF (Maks. 2MB
+                                per file).</p>
                         </div>
                     </div>
 
-                    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between rounded-b-[24px]">
-                        <div class="flex items-center gap-2"><span class="text-sm font-bold text-slate-500">Total:</span><span class="text-2xl font-black" :class="price === 'Gratis' ? 'text-green-600' : 'text-slate-900'" x-text="price"></span></div>
+                    <div
+                        class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between rounded-b-[24px]">
+                        <div class="flex items-center gap-2"><span
+                                class="text-sm font-bold text-slate-500">Total:</span><span
+                                class="text-2xl font-black"
+                                :class="price === 'Gratis' ? 'text-green-600' : 'text-slate-900'"
+                                x-text="price"></span></div>
                         <div class="flex gap-3">
-                            <button type="button" @click="showModal = false" class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
-                            <button type="submit" class="px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2" :class="price === 'Gratis' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' : 'bg-[#10B981] hover:bg-[#059669] shadow-green-200'">
+                            <button type="button" @click="showModal = false"
+                                class="px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
+                            <button type="submit"
+                                class="px-6 py-2.5 text-sm font-bold text-white rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                                :class="price === 'Gratis' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' :
+                                    'bg-[#10B981] hover:bg-[#059669] shadow-green-200'">
                                 <span x-text="price === 'Gratis' ? 'Kirim Pendaftaran' : 'Lanjut Bayar'"></span>
-                                <svg x-show="price !== 'Gratis'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                <svg x-show="price !== 'Gratis'" class="w-4 h-4" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -372,21 +565,41 @@
     <x-footer />
 
     <div x-data="{ isProfileAlertOpen: false }" @open-profile-alert.window="isProfileAlertOpen = true">
-        <div x-show="isProfileAlertOpen" style="display: none;" class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
-            <div x-show="isProfileAlertOpen" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="isProfileAlertOpen = false" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
-            <div x-show="isProfileAlertOpen" class="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl relative z-10 border border-slate-100 flex flex-col p-8 md:p-10 text-center">
-                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 border border-blue-100 mb-6">
-                    <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+        <div x-show="isProfileAlertOpen" style="display: none;"
+            class="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90"
+            x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
+            <div x-show="isProfileAlertOpen" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                @click="isProfileAlertOpen = false" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"></div>
+            <div x-show="isProfileAlertOpen"
+                class="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl relative z-10 border border-slate-100 flex flex-col p-8 md:p-10 text-center">
+                <div
+                    class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 border border-blue-100 mb-6">
+                    <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                     </svg>
                 </div>
-                <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-3">Ups! Profil Kamu Belum Lengkap!</h3>
-                <p class="text-slate-600 font-medium mb-8">Untuk mendaftar lomba, pastikan kamu sudah melengkapi data **Nama Lengkap**, **Nomor WA**, dan **Asal Sekolah** di halaman profil terlebih dahulu.</p>
+                <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-3">Ups! Profil Kamu Belum Lengkap!
+                </h3>
+                <p class="text-slate-600 font-medium mb-8">Untuk mendaftar lomba, pastikan kamu sudah melengkapi data
+                    **Nama Lengkap**, **Nomor WA**, dan **Asal Sekolah** di halaman profil terlebih dahulu.</p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center pt-6 border-t border-slate-100">
-                    <button type="button" @click="isProfileAlertOpen = false" class="px-8 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full transition-colors text-sm active:scale-95">Nanti Saja</button>
-                    <a href="{{ route('profile.index') }}" @click="isProfileAlertOpen = false" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all active:scale-95 shadow-lg shadow-blue-200 text-sm flex items-center justify-center gap-2">
+                    <button type="button" @click="isProfileAlertOpen = false"
+                        class="px-8 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full transition-colors text-sm active:scale-95">Nanti
+                        Saja</button>
+                    <a href="{{ route('profile.index') }}" @click="isProfileAlertOpen = false"
+                        class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all active:scale-95 shadow-lg shadow-blue-200 text-sm flex items-center justify-center gap-2">
                         Lengkapi Profil Sekarang
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
                     </a>
                 </div>
             </div>
@@ -443,7 +656,8 @@
                     const judulLomba = titleElement ? titleElement.textContent.toLowerCase() : '';
 
                     const matchTingkat = (activeTingkat === 'semua') || cardTingkat.includes(activeTingkat);
-                    const matchKategori = (activeKategori === 'semua') || cardKategori.includes(activeKategori);
+                    const matchKategori = (activeKategori === 'semua') || cardKategori.includes(
+                        activeKategori);
                     const matchBiaya = (activeBiaya === 'semua') || cardBiaya.includes(activeBiaya);
                     const matchSearch = judulLomba.includes(searchQuery);
 
