@@ -381,10 +381,8 @@ class OrganizerController extends Controller
     public function toggleStatus(Request $request, $id)
     {
         // 1. Cari lomba berdasarkan ID dan pastikan itu milik panitia yang sedang login (Keamanan)
-        $lomba = \App\Models\Competition::where('user_id', auth()->id())->findOrFail($id);
+        $lomba = \App\Models\Competition::where('user_id', Auth::id())->findOrFail($id);
 
-        // 2. Cek apakah saklar dikirim dalam keadaan menyala (dicentang)
-        // Checkbox di HTML jika dicentang akan ada nilainya, jika tidak dicentang dia tidak terkirim (false)
         $isTutup = $request->has('is_pendaftaran_tutup');
 
         // 3. Update kolom di database
@@ -393,8 +391,8 @@ class OrganizerController extends Controller
         ]);
 
         // 4. Siapkan pesan sukses dinamis berdasarkan statusnya
-        $pesan = $isTutup 
-            ? 'Rem Darurat ditarik: Pendaftaran lomba berhasil DITUTUP!' 
+        $pesan = $isTutup
+            ? 'Rem Darurat ditarik: Pendaftaran lomba berhasil DITUTUP!'
             : 'Saklar dimatikan: Pendaftaran lomba kembali DIBUKA!';
 
         // 5. Kembalikan ke halaman dashboard beserta notifikasi SweetAlert

@@ -245,17 +245,44 @@
                                                     Bagikan ke WA
                                                 </a>
 
-                                                <button
-                                                    class="flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors w-full text-left">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z">
-                                                        </path>
-                                                    </svg>
-                                                    Simpan Lomba
-                                                </button>
+                                                <form action="{{ route('bookmark.toggle', $lomba->id) }}"
+                                                    method="POST" class="w-full m-0">
+                                                    @csrf
+                                                    @php
+                                                        // Cek apakah user sudah menyimpan lomba ini (Beri warna biru jika sudah)
+                                                        $isBookmarked =
+                                                            auth()->check() &&
+                                                            auth()
+                                                                ->user()
+                                                                ->bookmarkedCompetitions->contains($lomba->id);
+                                                    @endphp
+
+                                                    <button type="submit"
+                                                        class="flex items-center gap-2 px-4 py-2 text-xs font-bold w-full text-left transition-colors {{ $isBookmarked ? 'text-blue-600 bg-blue-50' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50' }}">
+
+                                                        @if ($isBookmarked)
+                                                            <!-- Ikon Bookmark Terisi (Solid) -->
+                                                            <svg class="w-4 h-4" fill="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path
+                                                                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z">
+                                                                </path>
+                                                            </svg>
+                                                            Tersimpan
+                                                        @else
+                                                            <!-- Ikon Bookmark Kosong (Outline) -->
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z">
+                                                                </path>
+                                                            </svg>
+                                                            Simpan Lomba
+                                                        @endif
+
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
@@ -463,7 +490,8 @@
                         <div>
                             <h2 class="text-xl font-extrabold text-slate-900">Registrasi Kompetisi</h2>
                             <p class="text-sm font-semibold text-slate-500 mt-1"><span x-text="compName"></span> -
-                                <span class="text-blue-600" x-text="bidang"></span></p>
+                                <span class="text-blue-600" x-text="bidang"></span>
+                            </p>
                         </div>
                         <button type="button" @click="showModal = false"
                             class="p-2 bg-white hover:bg-slate-200 rounded-full transition-colors">

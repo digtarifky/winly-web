@@ -58,10 +58,11 @@ Route::middleware('auth')->group(function () {
         return view('home', ['registrations' => $registrations]);
     })->name('dashboard');
 
-    // Profil & Pesanan
+    // Profil, Bookmark, & Pesanan
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/pesanan', [ProfileController::class, 'pesanan'])->name('pesanan');
+    Route::post('/lomba/{id}/bookmark', [ProfileController::class, 'toggleBookmark'])->name('bookmark.toggle');
     
     // Pendaftaran & Pembayaran
     Route::post('/registrations/store', [RegistrationController::class, 'store'])->name('registrations.store');
@@ -87,7 +88,7 @@ Route::prefix('penyelenggara')->name('penyelenggara.')->middleware('auth')->grou
     Route::put('/update-lomba/{id}', [OrganizerController::class, 'update'])->name('update');
     Route::delete('/hapus-lomba/{id}', [OrganizerController::class, 'destroy'])->name('destroy');
     // Route untuk Toggle Buka/Tutup Pendaftaran Manual
-    Route::patch('/penyelenggara/lomba/{id}/toggle-status', [App\Http\Controllers\OrganizerController::class, 'toggleStatus'])->name('toggle-status');
+    Route::patch('/penyelenggara/lomba/{id}/toggle-status', [OrganizerController::class, 'toggleStatus'])->name('toggle-status');
     
     // Pembayaran QRIS Penyelenggara
     Route::get('/pembayaran-lomba/{id}', [OrganizerController::class, 'payment'])->name('payment');

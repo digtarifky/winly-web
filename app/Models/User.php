@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\PesertaProfile;
+use App\Models\Competition;
 
 #[Fillable(['name', 'email', 'password', 'role',])]
 #[Hidden(['password', 'remember_token'])]
@@ -98,5 +99,11 @@ class User extends Authenticatable
                !empty($profile->no_wa) && 
                !empty($profile->asal_instansi) && 
                !empty($profile->tingkat_pendidikan);
+    }
+
+    public function bookmarkedCompetitions()
+    {
+        // Pastikan 'Competition::class' sudah di-import di atas, atau gunakan path lengkap:
+        return $this->belongsToMany(\App\Models\Competition::class, 'bookmarks')->withTimestamps();
     }
 }

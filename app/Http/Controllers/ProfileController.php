@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -12,8 +13,8 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $profile = $user->profile()->firstOrCreate([]); 
-        
-        return view('profile', compact('user', 'profile'));
+        $bookmarkedCompetitions = $user->bookmarkedCompetitions;
+        return view('profile', compact('user', 'profile', 'bookmarkedCompetitions'));
     }
 
     public function update(Request $request)
@@ -55,5 +56,15 @@ class ProfileController extends Controller
             ->get();
 
         return view('pesanan', compact('user', 'pesanan'));
+    }
+
+    public function toggleBookmark($id)
+    {
+        $user = User::find(Auth::id());
+        
+        // Fitur sakti 'toggle' dari Laravel
+        $user->bookmarkedCompetitions()->toggle($id);
+
+        return back()->with('success', 'Daftar simpanan lomba berhasil diperbarui!');
     }
 }
