@@ -26,7 +26,7 @@
 
     <x-nav />
 
-    <main class="flex-grow flex items-center justify-center py-36">
+    <main class="flex-grow flex items-center justify-center py-10">
         <section class="max-w-4xl mx-auto px-6 text-center">
             <div class="flex justify-center mb-6">
                 <span
@@ -96,49 +96,8 @@
 
     </main>
 
-
-    {{-- card informasi h-7 --}}
-    <div class="max-w-screen-2xl mx-auto text-left w-full px-4">
-
-        <div class="flex items-center justify-between mb-6 px-2">
-            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Upcoming Deadlines (H-7)</h2>
-            <a href="#"
-                class="text-base md:text-lg font-bold text-blue-600 hover:text-blue-700 transition-colors">View all</a>
-        </div>
-
-        <div
-            class="bg-blue-200 backdrop-blur-xl border border-white/60 rounded-[32px] p-6 md:p-8 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 cursor-pointer">
-
-            <div class="flex items-center gap-6 md:gap-8">
-
-                <div
-                    class="w-20 h-20 md:w-24 md:h-24 rounded-2xl shrink-0 shadow-sm overflow-hidden bg-white/80 border border-white">
-                    <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                        alt="Poster Global Innovation Challenge" class="w-full h-full object-cover">
-                </div>
-
-                <div>
-                    <h3 class="text-xl md:text-3xl font-extrabold text-slate-900 mb-1 tracking-tight">Global Innovation
-                        Challenge</h3>
-                    <p class="text-base md:text-lg font-medium text-slate-700/80">Submission deadline in 3 days</p>
-                </div>
-            </div>
-
-            <div class="flex flex-col items-end gap-2 md:gap-3 shrink-0">
-                <span
-                    class="bg-red-500 backdrop-blur-sm text-white text-xs md:text-sm font-bold px-4 py-2 rounded-full tracking-wider uppercase shadow-sm border border-[#71530E]/20">
-                    Urgent
-                </span>
-                <span class="text-base md:text-xl font-extrabold text-slate-900">
-                    Oct 24, 2026
-                </span>
-            </div>
-
-        </div>
-
-    </div>
     {{-- card informasi poster --}}
-    <section class="mt-32 max-w-7xl mx-auto px-6 mb-24 w-full">
+    <section class="mt-8 max-w-7xl mx-auto px-6 w-full">
 
         <div class="text-center mb-14">
             <div
@@ -146,7 +105,7 @@
                 🏆 Kompetisi Seru
             </div>
             <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight">
-                Kompetisi Mendatang!
+                Segera Daftar Dirimu!
             </h2>
             <p class="text-slate-500 text-lg max-w-2xl mx-auto font-medium leading-relaxed">
                 Ikuti kompetisi olimpiade sains dan tunjukkan potensimu bersama ribuan pelajar dari seluruh Indonesia.
@@ -240,7 +199,8 @@
                             @forelse($benefits as $ben)
                                 <span
                                     class="px-2.5 py-1 bg-indigo-50/50 text-indigo-600 text-[10px] font-bold rounded-lg border border-indigo-100 flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>

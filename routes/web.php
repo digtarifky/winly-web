@@ -2,9 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CompetitionController;
 use App\Http\Controllers\RegistrationController;
-use App\Models\Registration;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\PublicController;
@@ -13,15 +11,9 @@ use App\Http\Controllers\ProfileController;
 // ==========================================
 // AREA PUBLIK (Bisa diakses siapa saja)
 // ==========================================
-Route::get('/', function () {
-    $latestCompetitions = \App\Models\Competition::with('fields')
-        ->withCount('registrations')
-        ->where('status', 'aktif')
-        ->latest() 
-        ->take(3)
-        ->get();
-   return view('home', ['latestCompetitions' => $latestCompetitions]);
-})->name('home');
+
+
+Route::get('/', [PublicController::class, 'index'])->name('home');
 
 Route::get('/news', function () {
     return view('news');
@@ -29,14 +21,15 @@ Route::get('/news', function () {
 
 Route::get('/competitions', [PublicController::class, 'competitions'])->name('competitions');
 
-
 // ==========================================
 // AREA GUEST (Hanya untuk yang BELUM login)
 // ==========================================
 Route::middleware('guest')->group(function () {
+    // Rute Register
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
     
+    // Rute Login
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 });
@@ -49,13 +42,45 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
 
-    // Dashboard Peserta
+    // Dashboard Peserta (Halaman SETELAH LOGIN)
     Route::get('/home', function () {
-        $registrations = Registration::where('user_id', Auth::id())
-                                     ->with('field.competition')
-                                     ->latest()
-                                     ->get();
-        return view('home', ['registrations' => $registrations]);
+        $hariIni = \Carbon\Carbon::now()->startOfDay();
+        $batasH7 = $hariIni->copy()->addDays(7)->endOfDay();
+
+        // 1. Saring Lomba 
+        $queryLombaBuka = \App\Models\Competition::with('fields')
+            ->withCount('registrations')
+            ->where('status', 'aktif')
+            ->where('is_pendaftaran_tutup', false)
+            ->where(function($query) use ($hariIni) {
+                $query->whereNull('tgl_tutup_pendaftaran')
+                      ->orWhere('tgl_tutup_pendaftaran', '>=', $hariIni);
+            })
+            ->latest()
+            ->get();
+
+        $semuaLombaAman = $queryLombaBuka->filter(function ($lomba) {
+            $kuota = $lomba->kuota_peserta ?? 100;
+            return $lomba->registrations_count < $kuota;
+        });
+
+        $upcomingDeadlines = $semuaLombaAman->filter(function ($lomba) use ($hariIni, $batasH7) {
+            if (!$lomba->tgl_tutup_pendaftaran) return false;
+            $tglTutup = \Carbon\Carbon::parse($lomba->tgl_tutup_pendaftaran)->endOfDay();
+            return $tglTutup->between($hariIni, $batasH7);
+        })->sortBy('tgl_tutup_pendaftaran')->take(3);
+
+        $latestCompetitions = $semuaLombaAman->take(3);
+
+        // KODE TAMBAHAN KHUSUS SETELAH LOGIN (Mengambil data pendaftaran user)
+        $registrations = \App\Models\Registration::where('user_id', Auth::id())
+            ->with('field.competition')
+            ->latest()
+            ->get();
+
+        // Kirim semua variabel ke view
+        return view('home', compact('latestCompetitions', 'upcomingDeadlines', 'registrations'));
+        
     })->name('dashboard');
 
     // Profil, Bookmark, & Pesanan
@@ -88,8 +113,8 @@ Route::prefix('penyelenggara')->name('penyelenggara.')->middleware('auth')->grou
     Route::put('/update-lomba/{id}', [OrganizerController::class, 'update'])->name('update');
     Route::delete('/hapus-lomba/{id}', [OrganizerController::class, 'destroy'])->name('destroy');
     // Route untuk Toggle Buka/Tutup Pendaftaran Manual
-    Route::patch('/penyelenggara/lomba/{id}/toggle-status', [OrganizerController::class, 'toggleStatus'])->name('toggle-status');
-    
+    Route::patch('/lomba/{id}/toggle-status', [OrganizerController::class, 'toggleStatus'])->name('toggle-status');
+
     // Pembayaran QRIS Penyelenggara
     Route::get('/pembayaran-lomba/{id}', [OrganizerController::class, 'payment'])->name('payment');
     Route::post('/pembayaran-lomba/{id}/konfirmasi', [OrganizerController::class, 'confirmPayment'])->name('confirmPayment');
