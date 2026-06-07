@@ -28,7 +28,7 @@
 
     <main class="flex-grow flex items-center justify-center py-10">
         <section class="max-w-4xl mx-auto px-6 text-center">
-            <div class="flex justify-center mb-6">
+            <div class="flex justify-center mb-6 mt-24">
                 <span
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-md border border-slate-200 text-xs font-medium text-slate-600 shadow-sm">
                     🏆 Find Your Competitions in Here
@@ -41,12 +41,12 @@
                 </h1>
             </section>
 
-            <p class="text-slate-600 text-lg md:text-xl leading-relaxed mb-10 max-w-2xl mx-auto">
+            <p class="text-slate-600 text-lg md:text-xl leading-relaxed mb-16 max-w-2xl mx-auto">
                 Bayangkan namamu dipanggil saat upacara sekolah, fotomu terpampang di papan pengumuman,
                 dan semua orang mengenalimu sebagai pemenang Olimpiade. Mulailah perjalananmu di sini!
             </p>
 
-            <div class="flex flex-wrap justify-center gap-4 mb-16">
+            <div class="flex flex-wrap justify-center gap-4 mb-20">
                 @php
                     if (auth()->check()) {
                         if (auth()->user()->role === 'penyelenggara') {
@@ -100,10 +100,6 @@
     <section class="mt-8 max-w-7xl mx-auto px-6 w-full">
 
         <div class="text-center mb-14">
-            <div
-                class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-sm font-bold mb-5 shadow-sm">
-                🏆 Kompetisi Seru
-            </div>
             <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-5 tracking-tight">
                 Segera Daftar Dirimu!
             </h2>

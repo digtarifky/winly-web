@@ -9,7 +9,6 @@
 
     $isDashboardActive = request()->is('/') || request()->routeIs('penyelenggara.dashboard');
     $isCompetitionsActive = request()->is('competitions*') || request()->routeIs('penyelenggara.manajemen');
-    $isNewsActive = request()->is('news*');
 @endphp
 
 <nav
@@ -36,7 +35,7 @@
             </a>
 
             <div
-                class="hidden lg:flex items-center bg-[#F4F7FE] rounded-full px-5 py-3 w-[250px] xl:w-[350px] border border-transparent focus-within:border-blue-200 focus-within:bg-white transition-all">
+                class="hidden lg:flex items-center bg-[#F4F7FE] rounded-full px-5 py-3 w-[270px] border border-transparent focus-within:border-blue-200 focus-within:bg-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -54,10 +53,6 @@
                 <a href="{{ $competitionsUrl }}"
                     class="{{ $isCompetitionsActive ? 'bg-blue-600 text-white px-6 shadow-lg shadow-blue-500/20' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50 px-5' }} py-3 rounded-full font-bold text-base transition-all duration-300">
                     Competitions
-                </a>
-                <a href="{{ route('news') }}"
-                    class="{{ $isNewsActive ? 'bg-blue-600 text-white px-6 shadow-lg shadow-blue-500/20' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50 px-5' }} py-3 rounded-full font-bold text-base transition-all duration-300">
-                    News
                 </a>
                 @if (auth()->check() && auth()->user()->role === 'peserta')
                     <a href="{{ url('/pesanan') }}"
@@ -128,10 +123,6 @@
             <a href="{{ $competitionsUrl }}"
                 class="{{ $isCompetitionsActive ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50' }} px-4 py-3 rounded-xl font-bold text-[15px] transition-colors block">
                 Competitions
-            </a>
-            <a href="{{ route('news') }}"
-                class="{{ $isNewsActive ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:text-blue-600 hover:bg-blue-50' }} px-4 py-3 rounded-xl font-bold text-[15px] transition-colors block">
-                News
             </a>
 
             @guest
