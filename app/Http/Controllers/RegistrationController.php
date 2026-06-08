@@ -78,8 +78,7 @@ class RegistrationController extends Controller
 
         // 7. Redirect berdasarkan Jalur
         if ($request->jalur === 'gratis') {
-            $linkWa = $bidang->link_wa ?? 'https://wa.me/';
-            return redirect()->away($linkWa);
+            return redirect()->route('home')->with('success', 'Pendaftaran berhasil dikirim! Silakan tunggu verifikasi dari panitia.');
         } else {
             return redirect()->route('peserta.payment', $registration->id);
         }
@@ -129,7 +128,10 @@ class RegistrationController extends Controller
 
             DB::commit();
 
-            return redirect()->route('competitions')->with('success', 'Pembayaran berhasil! Anda telah resmi terdaftar di perlombaan ini.');
+            // 2. LOGIKA BARU: Redirect ke Grup WA Panitia
+            $linkWa = $registration->field->link_wa ?? 'https://wa.me/';
+            return redirect()->away($linkWa);
+
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors('Terjadi kesalahan saat memproses pembayaran: ' . $e->getMessage());
