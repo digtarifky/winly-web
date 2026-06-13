@@ -61,17 +61,23 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            
+            $user = Auth::user();
 
-            // Arahkan ke halaman sesuai Role
-            if (Auth::user()->role === 'penyelenggara') {
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+                
+            } elseif ($user->role === 'penyelenggara') {
                 return redirect()->route('penyelenggara.dashboard');
+                
+            } else {
+                return redirect()->route('dashboard');
             }
-            return redirect()->route('home');
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ]);
+            'email' => 'Email atau password salah.',
+        ])->onlyInput('email');
     }
 
     // 5. Proses Logout

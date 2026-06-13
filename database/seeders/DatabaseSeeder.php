@@ -30,6 +30,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // 2. buat user admin
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@winly.com'], 
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password'),
+                'role' => 'admin'
+            ]
+        );
+
         // 4. Buat Lomba 1: PSN 2026 (Hanya Berbayar)
         $psn = Competition::create([
             'user_id' => $admin->id,
