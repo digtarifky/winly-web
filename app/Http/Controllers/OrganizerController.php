@@ -182,30 +182,6 @@ class OrganizerController extends Controller
             DB::rollback();
             return back()->withErrors('Terjadi kesalahan sistem: ' . $e->getMessage())->withInput();
         }
-
-        // Blok kode lama di bawah ini tidak akan pernah tereksekusi karena sudah ada return di atas.
-        // Jika kode ini sebenarnya untuk method lain, pertimbangkan untuk memindahkannya.
-        /*
-        $lomba = Competition::withCount(['registrations' => function ($query) {
-            $query->where('status_pembayaran', 'sukses');
-        }])->findOrFail($competition_id);
-
-        $hariIni = Carbon::now()->startOfDay();
-        $tglBuka = Carbon::parse($lomba->tgl_buka_pendaftaran)->startOfDay();
-        $tglTutup = Carbon::parse($lomba->tgl_tutup_pendaftaran)->endOfDay();
-
-        if ($hariIni->lt($tglBuka)) {
-            return back()->withErrors('Pendaftaran lomba ini belum dibuka! Pendaftaran dibuka mulai tanggal ' . $tglBuka->format('d M Y'));
-        }
-
-        if ($hariIni->gt($tglTutup)) {
-            return back()->withErrors('Mohon maaf, pendaftaran lomba ini sudah ditutup karena telah melewati batas tanggal penutupan.');
-        }
-
-        if ($lomba->registrations_count >= $lomba->kuota_peserta) {
-            return back()->withErrors('Mohon maaf, pendaftaran tidak dapat dilanjutkan karena kuota peserta sudah terpenuhi (Penuh).');
-        }
-        */
     }
 
     // 4. Menampilkan Form Edit
@@ -384,5 +360,99 @@ class OrganizerController extends Controller
             : 'Saklar dimatikan: Pendaftaran lomba kembali DIBUKA!';
 
         return back()->with('success', $pesan);
+    }
+
+    // 11. Halaman Statistik & Laporan
+    public function statistik()
+    {
+        $user = Auth::user();
+        
+        // 1. Ambil semua lomba milik panitia
+        $competitions = Competition::where('user_id', $user->id)->latest()->get();
+        $competitionIds = $competitions->pluck('id')->toArray();
+
+        // 2. Ambil semua registrasi terkait lomba tersebut beserta relasinya
+        $allRegistrations = Registration::with(['user.profile', 'field'])
+            ->whereHas('field', function ($query) use ($competitionIds) {
+                $query->whereIn('competition_id', $competitionIds);
+            })->get();
+
+        // ==========================================
+        // DATA GRAFIK 1: Pemasukan & Jalur
+        // ==========================================
+        // Asumsi nilai kolom di DB adalah 'gratis' dan 'berbayar'
+        $jalurGratis = $allRegistrations->where('jalur_pendaftaran', 'gratis')->count();
+        $jalurBerbayar = $allRegistrations->whereIn('jalur_pendaftaran', ['berbayar', 'premium'])->count(); 
+        
+        // Hitung total uang dari peserta yang statusnya sukses
+        $totalPendapatan = $allRegistrations->whereIn('status_pembayaran', ['sukses', 'lolos', 'lunas'])->sum(function ($reg) {
+            return $reg->field->harga ?? 0;
+        });
+
+        // ==========================================
+        // DATA GRAFIK 2: Tren Pendaftaran 14 Hari Terakhir
+        // ==========================================
+        $tanggalMulai = Carbon::now()->subDays(13)->startOfDay();
+        $trenData = $allRegistrations->where('created_at', '>=', $tanggalMulai)
+            ->groupBy(function ($reg) {
+                return Carbon::parse($reg->created_at)->format('Y-m-d');
+            });
+
+        $labelTren = [];
+        $dataTren = [];
+        
+        // Looping mundur 14 hari agar tanggal yang kosong tetap terisi angka 0
+        for ($i = 0; $i < 14; $i++) {
+            $tgl = Carbon::now()->subDays(13 - $i)->format('Y-m-d');
+            $labelTren[] = Carbon::parse($tgl)->format('d M');
+            $dataTren[] = isset($trenData[$tgl]) ? $trenData[$tgl]->count() : 0;
+        }
+
+        // ==========================================
+        // DATA GRAFIK 3: Kinerja Verifikasi per Lomba
+        // ==========================================
+        $labelLomba = [];
+        $dataSukses = [];
+        $dataPending = [];
+        $dataGagal = [];
+
+        foreach ($competitions as $lomba) {
+            // Potong judul agar label di bawah grafik tidak kepanjangan
+            $labelLomba[] = Str::limit($lomba->judul_lomba, 15);
+            $regsLomba = $allRegistrations->where('field.competition_id', $lomba->id);
+            
+            $dataSukses[] = $regsLomba->whereIn('status_pembayaran', ['sukses', 'lolos', 'lunas'])->count();
+            $dataPending[] = $regsLomba->whereIn('status_pembayaran', ['menunggu', 'menunggu_verifikasi'])->count();
+            $dataGagal[] = $regsLomba->where('status_pembayaran', 'gagal')->count();
+        }
+
+        // ==========================================
+        // DATA GRAFIK 4: Top 5 Instansi
+        // ==========================================
+        $instansiCounts = [];
+        foreach ($allRegistrations as $reg) {
+            // Cek field instansi / asal_instansi
+            $instansi = $reg->user->profile->asal_instansi ?? $reg->user->profile->instansi ?? 'Umum / Lainnya';
+            if (!isset($instansiCounts[$instansi])) {
+                $instansiCounts[$instansi] = 0;
+            }
+            $instansiCounts[$instansi]++;
+        }
+        
+        // Urutkan dari yang terbanyak dan potong ambil 5 teratas
+        arsort($instansiCounts);
+        $topInstansi = array_slice($instansiCounts, 0, 5);
+        
+        $labelInstansi = array_keys($topInstansi);
+        $dataInstansi = array_values($topInstansi);
+
+        // Lempar semua data super lengkap ini ke View baru
+        return view('penyelenggara.statistik', compact(
+            'user',
+            'jalurGratis', 'jalurBerbayar', 'totalPendapatan',
+            'labelTren', 'dataTren',
+            'labelLomba', 'dataSukses', 'dataPending', 'dataGagal',
+            'labelInstansi', 'dataInstansi'
+        ));
     }
 }

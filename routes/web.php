@@ -105,6 +105,7 @@ Route::prefix('penyelenggara')->name('penyelenggara.')->middleware('auth')->grou
     
     Route::get('/dashboard', [OrganizerController::class, 'index'])->name('dashboard');
     Route::get('/manajemen', [OrganizerController::class, 'manajemen'])->name('manajemen');
+    Route::get('/penyelenggara/statistik', [OrganizerController::class, 'statistik'])->name('statistik');
     
     // Manajemen Lomba
     Route::get('/buat-lomba', [OrganizerController::class, 'create'])->name('create');
@@ -112,6 +113,7 @@ Route::prefix('penyelenggara')->name('penyelenggara.')->middleware('auth')->grou
     Route::get('/edit-lomba/{id}', [OrganizerController::class, 'edit'])->name('edit');
     Route::put('/update-lomba/{id}', [OrganizerController::class, 'update'])->name('update');
     Route::delete('/hapus-lomba/{id}', [OrganizerController::class, 'destroy'])->name('destroy');
+    
     // Route untuk Toggle Buka/Tutup Pendaftaran Manual
     Route::patch('/lomba/{id}/toggle-status', [OrganizerController::class, 'toggleStatus'])->name('toggle-status');
 

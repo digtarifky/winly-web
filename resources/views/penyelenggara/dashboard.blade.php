@@ -25,13 +25,13 @@
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2">Menu Panitia</h3>
                 
                 <nav class="flex flex-col gap-2">
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-indigo-700 font-bold rounded-xl transition-colors border border-indigo-100">
-                        <span class="text-xl">🏠</span> 
+                    <a href="{{ route('penyelenggara.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-indigo-700 font-bold rounded-xl transition-colors border border-indigo-100">
+                        <span class="text-xl"></span> 
                         Ringkasan Utama
                     </a>
                     
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold rounded-xl transition-colors">
-                        <span class="text-xl opacity-70">📊</span> 
+                    <a href="{{ route('penyelenggara.statistik') }}" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold rounded-xl transition-colors">
+                        <span class="text-xl opacity-70"></span> 
                         Statistik & Laporan
                     </a>
                 </nav>
