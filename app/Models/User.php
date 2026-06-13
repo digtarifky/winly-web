@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\PesertaProfile;
 use App\Models\Competition;
 
-#[Fillable(['name', 'email', 'password', 'role', 'status_verifikasi', 'dokumen_verifikasi'])]
+#[Fillable(['name', 'email', 'password', 'role', 'status_verifikasi', 'dokumen_ktp', 'dokumen_legalitas'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {

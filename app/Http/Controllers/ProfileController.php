@@ -38,9 +38,11 @@ class ProfileController extends Controller
         ];
 
         // 2. Bedakan validasi 'tingkat_pendidikan' dan tambah validasi berkas
+        // 2. Tambahan Validasi Khusus Penyelenggara (Berkas Terpisah)
         if ($user->isPenyelenggara()) {
             $rules['tingkat_pendidikan'] = 'required|in:Universitas,Sekolah,Komunitas/Organisasi,Perusahaan,Instansi Pemerintah';
-            $rules['dokumen_verifikasi'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
+            $rules['dokumen_ktp'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
+            $rules['dokumen_legalitas'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
         } else {
             $rules['tingkat_pendidikan'] = 'required|in:SD,SMP,SMA,Mahasiswa,Umum';
         }
@@ -59,20 +61,28 @@ class ProfileController extends Controller
         );
 
         // 4. Eksekusi Berkas Verifikasi Khusus Penyelenggara ke tabel users
-        if ($user->isPenyelenggara() && $request->hasFile('dokumen_verifikasi')) {
-            // Hapus dokumen lama jika sebelumnya sudah pernah upload
-            if ($user->dokumen_verifikasi) {
-                Storage::disk('public')->delete($user->dokumen_verifikasi);
+        if ($user->isPenyelenggara()) {
+            $hasNewUpload = false;
+
+            // Proses Upload KTP
+            if ($request->hasFile('dokumen_ktp')) {
+                if ($user->dokumen_ktp) Storage::disk('public')->delete($user->dokumen_ktp);
+                $user->dokumen_ktp = $request->file('dokumen_ktp')->store('verifikasi/ktp', 'public');
+                $hasNewUpload = true;
             }
 
-            // Simpan foto/file ke folder storage/app/public/verifikasi
-            $path = $request->file('dokumen_verifikasi')->store('verifikasi', 'public');
-            
-            // Perbarui data user: status langsung menjadi pending (menunggu admin)
-            $user->update([
-                'dokumen_verifikasi' => $path,
-                'status_verifikasi' => 'pending'
-            ]);
+            // Proses Upload Surat Organisasi/Legalitas
+            if ($request->hasFile('dokumen_legalitas')) {
+                if ($user->dokumen_legalitas) Storage::disk('public')->delete($user->dokumen_legalitas);
+                $user->dokumen_legalitas = $request->file('dokumen_legalitas')->store('verifikasi/legalitas', 'public');
+                $hasNewUpload = true;
+            }
+
+            // Jika ada file baru yang diunggah, ubah status jadi pending agar di-review Admin
+            if ($hasNewUpload) {
+                $user->status_verifikasi = 'pending';
+                $user->save();
+            }
         }
 
         return back()->with('success', 'Data profil dan verifikasi berhasil disimpan!');
