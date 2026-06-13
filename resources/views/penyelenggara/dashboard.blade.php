@@ -34,6 +34,9 @@
                         <span class="text-xl opacity-70"></span> 
                         Statistik & Laporan
                     </a>
+                    <a href="{{ route('profile.index') }}" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold rounded-xl transition-all">
+                        <span class="text-xl opacity-60"></span> Profil & Verifikasi
+                    </a>
                 </nav>
             </div>
         </aside>

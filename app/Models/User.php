@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\PesertaProfile;
 use App\Models\Competition;
 
-#[Fillable(['name', 'email', 'password', 'role',])]
+#[Fillable(['name', 'email', 'password', 'role', 'status_verifikasi', 'dokumen_verifikasi'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,23 +30,22 @@ class User extends Authenticatable
         ];
     }
 
+    // =======================================================
+    // RELASI DATABASE
+    // =======================================================
+    
     // Relasi: Jika User adalah Penyelenggara, dia membuat banyak lomba
     public function competitions()
     {
         return $this->hasMany(Competition::class);
     }
 
-    // =======================================================
-    // WAJIB DITAMBAHKAN: Relasi ke tabel Registrations
-    // =======================================================
     // Relasi: Jika User adalah Peserta, dia punya banyak riwayat pendaftaran
     public function registrations()
     {
         return $this->hasMany(Registration::class);
     }
-    // =======================================================
 
-    // Relasi lama (Biarkan saja)
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
@@ -58,8 +56,20 @@ class User extends Authenticatable
         return $this->hasMany(Certificate::class);
     }
 
+    // Relasi One-to-One ke tabel profil (Peserta/Penyelenggara)
+    public function profile()
+    {
+        return $this->hasOne(PesertaProfile::class);
+    }
+
+    public function bookmarkedCompetitions()
+    {
+        return $this->belongsToMany(\App\Models\Competition::class, 'bookmarks')->withTimestamps();
+    }
+
+
     // =========================================================================
-    // CUSTOM HELPER METHODS (Opsional - Untuk mempermudah pengecekan role)
+    // CUSTOM HELPER METHODS (Untuk Cek Role & Status Verifikasi)
     // =========================================================================
 
     public function isAdmin()
@@ -77,16 +87,20 @@ class User extends Authenticatable
         return $this->role === 'peserta';
     }
 
-    // Relasi: Satu User bisa punya banyak pendaftaran
-    public function registration()
+    // HELPER BARU: Untuk cek status verifikasi Penyelenggara
+    public function isVerified()
     {
-        return $this->hasMany(Registration::class);
+        return $this->status_verifikasi === 'verified';
     }
 
-    // Relasi One-to-One ke tabel profil
-    public function profile()
+    public function isPendingVerification()
     {
-        return $this->hasOne(PesertaProfile::class);
+        return $this->status_verifikasi === 'pending';
+    }
+
+    public function isRejected()
+    {
+        return $this->status_verifikasi === 'rejected';
     }
 
     public function isProfileComplete()
@@ -99,11 +113,5 @@ class User extends Authenticatable
                !empty($profile->no_wa) && 
                !empty($profile->asal_instansi) && 
                !empty($profile->tingkat_pendidikan);
-    }
-
-    public function bookmarkedCompetitions()
-    {
-        // Pastikan 'Competition::class' sudah di-import di atas, atau gunakan path lengkap:
-        return $this->belongsToMany(\App\Models\Competition::class, 'bookmarks')->withTimestamps();
     }
 }
