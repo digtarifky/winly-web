@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 
 // ==========================================
 // AREA PUBLIK (Bisa diakses siapa saja)
@@ -126,4 +127,13 @@ Route::prefix('penyelenggara')->name('penyelenggara.')->middleware('auth')->grou
 
     // VERIFIKASI BUKTI PENDAFTARAN 
     Route::post('/pendaftaran/{id}/verifikasi', [OrganizerController::class, 'verify'])->name('pendaftaran.verify');
+});
+
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+    
+    // Dashboard Admin
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/verifikasi', [AdminController::class, 'verifikasi'])->name('verifikasi');
+    Route::post('/verifikasi/{id}/proses', [AdminController::class, 'prosesVerifikasi'])->name('verifikasi.proses');
+    
 });
