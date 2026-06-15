@@ -11,30 +11,40 @@ class AdminController extends Controller
 {
     public function index()
     {
-        // Pastikan hanya admin yang bisa mengakses ini
         if (Auth::user()->role !== 'admin') {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 
-        $user = Auth::user();
+        // 1. Hitung 3 Statistik Utama
+        $pendingVerificationCount = User::where('role', 'penyelenggara')->where('status_verifikasi', 'pending')->count();
+        $totalRevenue = Transaction::where('tipe_transaksi', 'publikasi_lomba')->where('status_pembayaran', 'berhasil')->sum('total_bayar');
+        $activeOrganizers = User::where('role', 'penyelenggara')->where('status_verifikasi', 'verified')->count();
 
-        // 1. Hitung Panitia yang butuh diverifikasi (Status: pending)
-        $pendingVerificationCount = User::where('role', 'penyelenggara')
-                                        ->where('status_verifikasi', 'pending')
-                                        ->count();
-                                        
-        // 2. Hitung Total Uang Masuk ke Winly (Dari pembayaran publikasi lomba)
-        $totalRevenue = Transaction::where('tipe_transaksi', 'publikasi_lomba')
-                                   ->where('status_pembayaran', 'berhasil')
-                                   ->sum('total_bayar');
+        // 2. Ambil Data Verifikasi
+        $panitiaPending = User::where('role', 'penyelenggara')->where('status_verifikasi', 'pending')->with('profile')->latest()->get();
+        
+        // PAGINATION: Riwayat Keputusan (Max 5, nama custom: riwayatPage)
+        $panitiaRiwayat = User::where('role', 'penyelenggara')
+                              ->whereIn('status_verifikasi', ['verified', 'rejected'])
+                              ->with('profile')
+                              ->latest()
+                              ->paginate(5, ['*'], 'riwayatPage');
 
-        // 3. Hitung Total Panitia yang sudah aktif (Status: verified)
-        $activeOrganizers = User::where('role', 'penyelenggara')
-                                ->where('status_verifikasi', 'verified')
-                                ->count();
+        // 3. Ambil Data Laporan Keuangan (Hanya Publikasi)
+        // PAGINATION: Laporan Keuangan (Max 10, nama custom: keuanganPage)
+        $transaksi = Transaction::with('user')
+                                ->where('tipe_transaksi', 'publikasi_lomba')
+                                ->latest()
+                                ->paginate(10, ['*'], 'keuanganPage');
 
-        // Lempar data ini ke view
-        return view('admin.dashboard', compact('user', 'pendingVerificationCount', 'totalRevenue', 'activeOrganizers'));
+        return view('admin.dashboard', compact(
+            'pendingVerificationCount', 
+            'totalRevenue', 
+            'activeOrganizers',
+            'panitiaPending',
+            'panitiaRiwayat',
+            'transaksi'
+        ));
     }
 
     // Halaman Daftar Verifikasi Panitia
@@ -74,7 +84,6 @@ class AdminController extends Controller
 
         $panitia = User::findOrFail($id);
         
-        // Update statusnya
         $panitia->update([
             'status_verifikasi' => $request->status
         ]);
