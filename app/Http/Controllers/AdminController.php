@@ -85,4 +85,25 @@ class AdminController extends Controller
 
         return back()->with('success', $pesan);
     }
+
+    // Halaman Laporan Keuangan
+    public function keuangan()
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak.');
+        }
+
+        // 1. Ambil data transaksi HANYA untuk Publikasi Lomba
+        $transaksi = Transaction::with('user')
+                                ->where('tipe_transaksi', 'publikasi_lomba')
+                                ->latest()
+                                ->get();
+
+        // 2. Hitung total pendapatan sukses HANYA dari Publikasi Lomba
+        $totalPendapatan = Transaction::where('tipe_transaksi', 'publikasi_lomba')
+                                      ->where('status_pembayaran', 'berhasil')
+                                      ->sum('total_bayar');
+
+        return view('admin.keuangan', compact('transaksi', 'totalPendapatan'));
+    }
 }

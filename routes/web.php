@@ -135,5 +135,6 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::get('/verifikasi', [AdminController::class, 'verifikasi'])->name('verifikasi');
     Route::post('/verifikasi/{id}/proses', [AdminController::class, 'prosesVerifikasi'])->name('verifikasi.proses');
-    
+    Route::get('/keuangan', [AdminController::class, 'keuangan'])->name('keuangan');
+
 });
