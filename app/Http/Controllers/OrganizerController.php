@@ -88,12 +88,21 @@ class OrganizerController extends Controller
     // Khusus untuk memanggil form kosong tambah lomba
     public function create()
     {
+        if (Auth::user()->status_verifikasi !== 'verified') {
+            return redirect()->route('penyelenggara.manajemen')
+                ->with('error', 'Akses ditolak. Akun Anda belum diverifikasi oleh Admin.');
+        }
         return view('penyelenggara.create');
     }
 
     // 3. Memproses Data dari Form Tambah Lomba
     public function store(Request $request)
-    {
+    {   
+        if (Auth::user()->status_verifikasi !== 'verified') {
+            return redirect()->route('penyelenggara.manajemen')
+                ->with('error', 'Akses ditolak. Akun Anda belum diverifikasi oleh Admin.');
+        }
+        
         $request->validate([
             'judul_lomba' => 'required|string|max:255',
             'kategori' => 'required|string|in:akademik,teknologi_it,ekonomi_bisnis,karya_tulis,seni_desain,kesehatan,soshum_hukum',
@@ -383,8 +392,6 @@ class OrganizerController extends Controller
         // Asumsi nilai kolom di DB adalah 'gratis' dan 'berbayar'
         $jalurGratis = $allRegistrations->where('jalur_pendaftaran', 'gratis')->count();
         $jalurBerbayar = $allRegistrations->whereIn('jalur_pendaftaran', ['berbayar', 'premium'])->count(); 
-        
-        // Hitung total uang dari peserta yang statusnya sukses
         $totalPendapatan = $allRegistrations->whereIn('status_pembayaran', ['sukses', 'lolos', 'lunas'])->sum(function ($reg) {
             return $reg->field->harga ?? 0;
         });
